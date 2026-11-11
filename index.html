@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Umrah Companion</title>
+<meta name="theme-color" content="#161614">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Umrah">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: Kaaba palette. Marble white ground, kiswa-black ink, brass-gold accent.
+   One-screen phone app: header with trip day, scrolling view, fixed bottom tab bar. */
+:root{
+  --ground:#F3F3F0;
+  --surface:#FFFFFF;
+  --ink:#161614;
+  --muted:#6A6A63;
+  --line:#DDDCD5;
+  --gold:#9A7428;
+  --gold-soft:#F1E8D2;
+  --ok:#2F6B45;
+  --warn:#A2461F;
+  --display:"Marcellus", "Times New Roman", serif;
+  --body:"Atkinson Hyperlegible", -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E0E0D; --surface:#1A1A18; --ink:#EDEBE4; --muted:#A3A097; --line:#2E2D29;
+    --gold:#D2AE5E; --gold-soft:#2B2416; --ok:#7CC293; --warn:#E78B63; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E0E0D; --surface:#1A1A18; --ink:#EDEBE4; --muted:#A3A097; --line:#2E2D29;
+  --gold:#D2AE5E; --gold-soft:#2B2416; --ok:#7CC293; --warn:#E78B63; color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;display:flex;flex-direction:column}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+header{padding:calc(14px + env(safe-area-inset-top)) 16px 10px;border-bottom:1px solid var(--line);background:var(--surface)}
+.brand{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.brand h1{font-family:var(--display);font-weight:400;font-size:24px;margin:0;letter-spacing:.02em;text-wrap:balance}
+.clock{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;text-align:right}
+.status{margin-top:6px;font-size:14px;color:var(--gold);font-weight:700}
+.track{display:flex;gap:3px;margin-top:8px}
+.track span{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.track span.past{background:var(--gold);opacity:.45}
+.track span.now{background:var(--gold)}
+main{flex:1;overflow-y:auto;padding:16px 16px 24px;-webkit-overflow-scrolling:touch}
+.view{display:none;max-width:640px;margin:0 auto}
+.view.on{display:block}
+h2{font-family:var(--display);font-weight:400;font-size:22px;margin:4px 0 12px;text-wrap:balance}
+h3{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:22px 0 8px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px;cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--ink);color:var(--ground);border-color:var(--ink)}
+.chip.today::after{content:" •";color:var(--gold)}
+.list{display:flex;flex-direction:column;gap:8px}
+.item{display:grid;grid-template-columns:58px 1fr 34px;gap:10px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+.item.key{border-left:4px solid var(--gold)}
+.item.next{box-shadow:0 0 0 2px var(--gold)}
+.time{font-weight:700;font-variant-numeric:tabular-nums;font-size:14px;color:var(--gold);line-height:1.3}
+.what{font-weight:700}
+.det{color:var(--muted);font-size:14px;margin-top:3px}
+.ref{display:inline-block;margin-top:6px;font-size:12px;background:var(--gold-soft);color:var(--ink);border-radius:6px;padding:2px 7px;font-variant-numeric:tabular-nums}
+.tick{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:transparent;cursor:pointer;display:grid;place-items:center;padding:0}
+.tick svg{width:16px;height:16px;opacity:0}
+.done .tick{background:var(--ok);border-color:var(--ok)}
+.done .tick svg{opacity:1}
+.done .what,.done .det{text-decoration:line-through;opacity:.55}
+.simple{grid-template-columns:1fr 34px}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 6px;border-radius:5px;border:1px solid var(--line);color:var(--muted);margin-left:6px;vertical-align:middle}
+.progress{font-size:14px;color:var(--muted);margin:-6px 0 12px;font-variant-numeric:tabular-nums}
+.seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px;margin-bottom:14px}
+.seg button{flex:1;border:0;background:transparent;padding:8px;border-radius:8px;cursor:pointer;font-weight:700;font-size:14px}
+.seg button.on{background:var(--ink);color:var(--ground)}
+/* Rounds counter */
+.counter{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.counter .top{display:flex;justify-content:space-between;align-items:baseline}
+.counter .name{font-family:var(--display);font-size:22px}
+.counter .of{color:var(--muted);font-variant-numeric:tabular-nums}
+.rounds{display:flex;gap:8px;justify-content:space-between;margin:14px 0}
+.rounds i{flex:1;aspect-ratio:1;max-width:40px;border-radius:50%;border:2px solid var(--gold);display:grid;place-items:center;font-style:normal;font-weight:700;font-size:14px;color:var(--gold);font-variant-numeric:tabular-nums}
+.rounds i.done{background:var(--gold);color:var(--surface)}
+.big{width:100%;border:0;border-radius:12px;padding:18px;background:var(--ink);color:var(--ground);font-size:18px;font-weight:700;cursor:pointer}
+.big:disabled{opacity:.4}
+.row{display:flex;gap:8px;margin-top:8px}
+.ghost{flex:1;border:1px solid var(--line);background:transparent;border-radius:10px;padding:10px;cursor:pointer;font-size:14px}
+.hint{font-size:14px;color:var(--muted);margin-top:10px}
+.dir{font-size:15px;font-weight:700;margin-top:4px;min-height:22px}
+/* Money */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+.tile b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+.tile span{font-size:13px;color:var(--muted)}
+.tile.hero{grid-column:1/-1;background:var(--ink);color:var(--ground);border-color:var(--ink)}
+.tile.hero span{color:inherit;opacity:.75}
+.money{display:grid;grid-template-columns:1fr auto;gap:4px 10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+.money .amt{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.money .sub{grid-column:1/-1;font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.money input{width:90px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--ground);color:var(--ink);font:inherit;font-size:14px;font-variant-numeric:tabular-nums}
+.over{color:var(--warn);font-weight:700}
+.under{color:var(--ok);font-weight:700}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px}
+.card .what{margin-bottom:2px}
+a{color:var(--gold)}
+nav{display:grid;grid-template-columns:repeat(6,1fr);border-top:1px solid var(--line);background:var(--surface);padding-bottom:env(safe-area-inset-bottom)}
+nav button{border:0;background:transparent;padding:8px 2px 9px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted)}
+nav button svg{width:22px;height:22px}
+nav button.on{color:var(--gold);font-weight:700}
+@media (prefers-reduced-motion:no-preference){.item,.tick{transition:background .15s,border-color .15s,opacity .15s}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><h1>Umrah Companion</h1><div class="clock" id="clock"></div></div>
+  <div class="status" id="status"></div>
+  <div class="track" id="track" aria-hidden="true"></div>
+</header>
+
+<main id="main">
+  <section class="view" id="v-today"></section>
+  <section class="view" id="v-plan"><h2>Day by day</h2><div class="chips" id="dayChips"></div><div id="dayList"></div></section>
+  <section class="view" id="v-rounds"><h2>Round counter</h2><div id="counters"></div></section>
+  <section class="view" id="v-lists"><h2>Checklists</h2>
+    <div class="seg"><button id="segZ" class="on">Ziyarah</button><button id="segP">Packing</button></div>
+    <div class="progress" id="listProg"></div><div id="listBody"></div></section>
+  <section class="view" id="v-money"><h2>Budget</h2><div id="moneyBody"></div></section>
+  <section class="view" id="v-info"><h2>Bookings and contacts</h2><div id="infoBody"></div></section>
+</main>
+
+<nav id="nav">
+  <button data-v="today" aria-label="Today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>Today</button>
+  <button data-v="plan" aria-label="Plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Plan</button>
+  <button data-v="rounds" aria-label="Rounds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="8" height="8"/><circle cx="12" cy="12" r="10" stroke-dasharray="3 3"/></svg>Rounds</button>
+  <button data-v="lists" aria-label="Lists"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 6h12M9 12h12M9 18h12M3 6l1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>Lists</button>
+  <button data-v="money" aria-label="Budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="3"/></svg>Budget</button>
+  <button data-v="info" aria-label="Info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 11v6M12 7.5v.5"/></svg>Info</button>
+</nav>
+
+<script>
+const CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12l5 5 9-10"/></svg>';
+const SHEET="https://docs.google.com/spreadsheets/d/1UTN3sdPywexuvMSmf-41RQPQqO0K7r8coGFfrSMAbWU/edit";
+
+/* ---------- Data (from the Umrah Plan sheet) ---------- */
+const DAYS=[
+ {id:"prep",date:null,label:"Before",title:"Before you go",items:[
+  ["15 Nov","Agoda charges €254.66 for Elaf Bakkah (18 to 24 Nov)","Free cancellation until 16 Nov, 23:59 Makkah time.","Agoda"],
+  ["Done","Umrah permit booked: Thu 19 Nov, 14:01","QR code appears 2 hours before in Nusuk.","Nusuk"],
+  ["By 17 Nov","Check your Rawdah permit: Thu 26 Nov, 02:00","Confirm it is under My Bookings in Nusuk and screenshot it.","Nusuk"],
+  ["By 17 Nov","Save offline copies","Flight e-ticket, train tickets, hotel confirmations, visa, passport. Download offline maps of Makkah and Madinah.",""],
+  ["By 17 Nov","Install and log in to apps","Nusuk, Careem, Uber, Makkah Bus, Haramain train, Booking.com, Agoda, WhatsApp.",""],
+  ["17 Nov","Check in online for RJ130 and RJ704","","Royal Jordanian"],
+  ["17 Nov","Pack (see Lists)","Ihram kit goes in the carry-on: you change in Amman.",""]]},
+ {id:"d1",date:"2026-11-18",label:"Wed 18",title:"Day 1 · To Amman",city:"Germany",items:[
+  ["10:00","Leave Soest for Düsseldorf airport","Be at the airport by 12:00.",""],
+  ["15:00","Flight RJ130 Düsseldorf to Amman","Arrives 21:25 local time.","Royal Jordanian",1],
+  ["21:25","Amman layover (4 h 10 min): get ready for ihram","Shower or make wudu, change into ihram, pray 2 rak'ah. Make the niyyah later, at the miqat.",""]]},
+ {id:"d2",date:"2026-11-19",label:"Thu 19",title:"Day 2 · Arrive and perform Umrah",city:"Makkah",items:[
+  ["01:35","Flight RJ704 Amman to Jeddah","When the crew announces the miqat, make the niyyah for Umrah and start the Talbiyah.","Royal Jordanian",1],
+  ["03:45","Land at Jeddah T1, immigration, bag","Show passport and e-visa. Buy a SIM at the kiosks on the way to the station only if it is before 05:15.","E-visa"],
+  ["06:05","Haramain train 05065 to Makkah","Coach 9, seat 255. Be at the platform by 05:30.","Haramain",1],
+  ["07:30","Taxi to Elaf Bakkah Hotel, check in","Ask reception to link your two bookings, and where the free shuttle drops you and picks you up.","Agoda"],
+  ["08:00","Sleep and eat, still in ihram","Wake by 11:45.",""],
+  ["12:07","Dhuhr at the Haram","Take the hotel shuttle.",""],
+  ["12:25","Perform Umrah","Tawaf 7 rounds, 2 rak'ah behind Maqam Ibrahim, Zamzam, Sa'i 7, then shave or trim. Use the Rounds tab to count. If Asr (about 15:12) starts, pause, pray, continue.","Nusuk 14:01",1],
+  ["Evening","Optional: thobe and SIM at the Clock Tower","STC and Mobily shops on floor P3 of Abraj Al Bait.",""]]},
+ {id:"d3",date:"2026-11-20",label:"Fri 20",title:"Day 3 · Jumu'ah",city:"Makkah",items:[
+  ["05:20","Fajr at the Haram","",""],
+  ["10:00","Leave for Jumu'ah","Dhuhr is about 12:10. Roads near the Haram close early.","",1],
+  ["17:37","Maghrib and Isha at the Haram","Isha about 19:07.",""]]},
+ {id:"d4",date:"2026-11-21",label:"Sat 21",title:"Day 4 · Makkah ziyarah",city:"Makkah",items:[
+  ["07:00","Makkah ziyarah by taxi (about 200 SAR)","Cave Hira first while it is cool, then Thawr, Arafat, Muzdalifah, Mina, Masjid Aisha. Tick places in Lists.","",1],
+  ["Today","Agoda charges €46.42 for 24 to 25 Nov","Charged to your card.","Agoda"]]},
+ {id:"d5",date:"2026-11-22",label:"Sun 22",title:"Day 5 · Haram day",city:"Makkah",items:[
+  ["All day","Extra tawaf, Quran, du'a","",""],
+  ["23:59","Last free cancellation for 24 to 25 Nov","Only if your plans change.","Agoda"]]},
+ {id:"d6",date:"2026-11-23",label:"Mon 23",title:"Day 6 · Haram or Taif",city:"Makkah",items:[
+  ["All day","Haram day, or optional Taif trip (about 250 SAR)","Taif is about 1.5 hours by car. Be back for Maghrib.",""]]},
+ {id:"d7",date:"2026-11-24",label:"Tue 24",title:"Day 7 · Last full day in Makkah",city:"Makkah",items:[
+  ["12:00","Check the room switch","First booking ends, second starts. Confirm you keep the same room.","Agoda"],
+  ["Evening","Pack and message Al Ayniah Hotel","Tell them you arrive on 25 Nov between 16:00 and 18:00. Phone +966 557722180.","Booking.com"]]},
+ {id:"d8",date:"2026-11-25",label:"Wed 25",title:"Day 8 · To Madinah",city:"Madinah",items:[
+  ["After Fajr","Farewell tawaf (Tawaf al-Wada)","Your last act in Makkah before leaving.","",1],
+  ["09:30","Check out of Elaf Bakkah","Checkout is before 12:00.",""],
+  ["09:45","Taxi to Makkah Haramain station","Be at the station by 10:30.",""],
+  ["11:20","Haramain train 01112 to Madinah","Coach 9, seat 243.","Haramain",1],
+  ["16:00","Check in at Al Ayniah Hotel","Window is 16:00 to 18:00. After 18:00 the hotel can charge SAR 483.86.","Booking.com",1],
+  ["Evening","Maghrib and Isha at Masjid an-Nabawi","Sleep early: Rawdah is at 02:00.",""]]},
+ {id:"d9",date:"2026-11-26",label:"Thu 26",title:"Day 9 · Rawdah",city:"Madinah",items:[
+  ["01:30","Go to the Rawdah gate","Gate 37 per your notes. Nusuk QR ready.","Nusuk Rawdah"],
+  ["02:00","Pray in the Rawdah","","Nusuk Rawdah",1],
+  ["After Fajr","Salam at the Prophet's grave","Then Abu Bakr and Umar.",""],
+  ["Morning","Visit Jannat al-Baqi","Rest in the afternoon.",""]]},
+ {id:"d10",date:"2026-11-27",label:"Fri 27",title:"Day 10 · Jumu'ah in Madinah",city:"Madinah",items:[
+  ["10:00","Go early for Jumu'ah at Masjid an-Nabawi","Arrive 2 hours before.","",1]]},
+ {id:"d11",date:"2026-11-28",label:"Sat 28",title:"Day 11 · Madinah ziyarah",city:"Madinah",items:[
+  ["07:00","Pray 2 rak'ah at Masjid Quba","Make wudu at the hotel first.","",1],
+  ["Morning","Madinah ziyarah by taxi (about 230 SAR)","Uhud, Qiblatayn, Seven Mosques. Tick places in Lists.",""]]},
+ {id:"d12",date:"2026-11-29",label:"Sun 29",title:"Day 12 · Last day",city:"Madinah",items:[
+  ["Day","Dates market, gifts, last prayers","",""],
+  ["Evening","Pack, weigh bags, book taxi for 03:30","Checked bag 30 kg, carry-on 7 kg.",""]]},
+ {id:"d13",date:"2026-11-30",label:"Mon 30",title:"Day 13 · Home",city:"Travel",items:[
+  ["03:30","Check out, taxi to Madinah airport","At the airport buy one sealed 5 L Zamzam and hand it in at check-in. Light jacket: mornings are cool.","",1],
+  ["07:00","Flight RJ723 Madinah to Amman","Arrives 08:55.","Royal Jordanian",1],
+  ["10:55","Flight RJ129 Amman to Düsseldorf","About 2 hours to connect. Arrives 14:00 German time.","Royal Jordanian"],
+  ["14:00","Train home to Soest","",""]]}
+];
+
+const ZIY=[
+ ["Sat 21 Nov · Makkah ziyarah",[
+  ["Jabal al-Nour (Cave Hira)","Cave of the first revelation. Climb 1 to 1.5 hours; go first while cool."],
+  ["Jabal Thawr","Cave where the Prophet and Abu Bakr hid during the Hijrah. Usually seen from below."],
+  ["Arafat and Jabal al-Rahmah","Plain of the main day of Hajj; you can walk up the Hill of Mercy."],
+  ["Muzdalifah","Where Hajj pilgrims spend the night after Arafat."],
+  ["Mina and the Jamarat","Tent city and the three pillars."],
+  ["Masjid Aisha (Tan'eem)","Miqat for those in Makkah making another Umrah."]]],
+ ["Makkah · any day, walking distance",[
+  ["Jannat al-Mu'alla","Cemetery of Khadijah (RA). Men only, after Fajr."],
+  ["Masjid al-Jinn","Next to Jannat al-Mu'alla."]]],
+ ["Mon 23 Nov · Taif (optional)",[
+  ["Masjid Abdullah ibn Abbas","Next to the grave of the Prophet's cousin."],
+  ["Masjid Addas","Where the Prophet met Addas."],
+  ["Al Hada mountain road","Views down towards Makkah; cooler air."]]],
+ ["Thu 26 Nov · Madinah",[
+  ["Rawdah (Riyad ul-Jannah)","02:00 slot, gate 37."],
+  ["Salam at the Prophet's grave","Enter from Bab al-Salam after Fajr."],
+  ["Jannat al-Baqi","Companions and family of the Prophet. Men only."]]],
+ ["Sat 28 Nov · Madinah ziyarah",[
+  ["Masjid Quba","First mosque in Islam. Pray 2 rak'ah."],
+  ["Mount Uhud and the martyrs","Hamza (RA) is buried here; Archers' Hill opposite."],
+  ["Masjid al-Qiblatayn","Where the qiblah changed to Makkah."],
+  ["Seven Mosques (Khandaq)","Site of the Battle of the Trench; Masjid al-Fath."]]],
+ ["Madinah · any day, walking distance",[
+  ["Masjid al-Ghamama","Where the Prophet prayed Eid and the rain prayer."],
+  ["Masjids of Abu Bakr and Ali (RA)","Near al-Ghamama."],
+  ["Dates market","Ajwa, Sukkari, Safawi to take home."]]]
+];
+
+const PACK=[
+ ["Documents",[["Passport","Carry-on"],["German residence permit","Carry-on · valid to 26 Jan 2027"],["Saudi e-visa printout","Carry-on"],["Flight e-ticket","Carry-on"],["Train tickets","Apple Wallet"],["Hotel confirmations","Phone"],["Nusuk permit screenshots","Phone"],["Health insurance card","Carry-on"]]],
+ ["Ihram and Umrah (carry-on)",[["Ihram set, plus a spare in checked bag","Carry-on"],["Ihram belt with pouch","Carry-on"],["Sandals that leave the ankle uncovered","Carry-on"],["Unscented soap, shampoo, deodorant","Carry-on"],["Small towel","Carry-on"],["Safety pins","Carry-on"],["Tasbih or counter","Carry-on"],["Dua book or app","Carry-on"]]],
+ ["Clothes",[["Loose long trousers (3 to 4)","Checked"],["Shirts, preferably long-sleeved (4 to 5)","Checked"],["Underwear and socks (7 to 8)","Checked"],["Light jacket or jumper","Checked"],["Comfortable walking shoes","Checked"],["Prayer cap","Checked"],["Sleepwear","Checked"],["Clothes for the flight home","Checked"]]],
+ ["Toiletries",[["Toothbrush, toothpaste, miswak","Checked"],["Razor or trimmer","Checked"],["Lip balm and unscented moisturiser","Checked"],["Unscented sunscreen","Checked"],["Attar (only after leaving ihram)","Checked"],["Liquids under 100 ml in a clear bag","Carry-on"]]],
+ ["Health",[["Regular medicines","Carry-on"],["Painkillers","Carry-on"],["Plasters and blister pads","Carry-on"],["Oral rehydration salts","Checked"],["Throat lozenges","Checked"],["Face masks","Carry-on"],["Hand sanitiser","Carry-on"]]],
+ ["Tech",[["Phone and charger","Carry-on"],["Power bank (never in checked bag)","Carry-on"],["Plug adapter, UK type G","Carry-on"],["Earphones","Carry-on"],["Offline maps downloaded","Phone"],["Apps installed and logged in","Phone"]]],
+ ["Money",[["Bank cards","Carry-on"],["Cash, 300 to 500 SAR to start","Carry-on"],["Card for Al Ayniah deposit","Carry-on"]]],
+ ["Trip home",[["Foldable bag for dates and gifts","Checked"],["Weigh bags (30 kg / 7 kg)","29 Nov"],["Zamzam 5 L, buy at Madinah airport","Free, check-in"]]]
+];
+
+const RATE=4.33;
+const BUDGET=[
+ ["Flights · Royal Jordanian","Paid",468,"EUR"],
+ ["Visa · Saudi tourist e-visa","Paid",93,"EUR"],
+ ["Elaf Bakkah 18 to 24 Nov","Card 15 Nov",254.66,"EUR"],
+ ["Elaf Bakkah 24 to 25 Nov","Card 21 Nov",46.42,"EUR"],
+ ["Al Ayniah 25 to 30 Nov","Pay at hotel",988.76,"SAR"],
+ ["Train Jeddah Airport to Makkah","Paid",46,"SAR"],
+ ["Train Makkah to Madinah","Paid",172,"SAR"],
+ ["Train Soest to Düsseldorf and back","Estimate",30,"EUR"],
+ ["Taxis to and from stations and airport","Estimate",170,"SAR"],
+ ["Makkah ziyarah taxi","Estimate",200,"SAR"],
+ ["Madinah ziyarah taxi","Estimate",230,"SAR"],
+ ["Extra Careem and Makkah Bus","Estimate",100,"SAR"],
+ ["Taif day trip","Optional",250,"SAR"],
+ ["Food, 12 days at €20","Estimate",240,"EUR"],
+ ["Saudi SIM","Estimate",70,"SAR"],
+ ["2 thobes","Estimate",200,"SAR"],
+ ["Dates and gifts","Estimate",300,"SAR"],
+ ["Barber, laundry, Zamzam","Estimate",105,"SAR"],
+ ["Buffer","Estimate",100,"EUR"]
+];
+
+const INFO=[
+ ["Flights","Royal Jordanian","Out: RJ130 Wed 18 Nov 15:00 DUS→AMM, RJ704 Thu 19 Nov 01:35 AMM→JED T1. Back: RJ723 Mon 30 Nov 07:00 MED→AMM, RJ129 10:55 AMM→DUS. 1 × 30 kg checked, 7 kg carry-on. Customer service +962 6 5100000."],
+ ["Makkah hotel","Elaf Bakkah Hotel","Al Rahmah St, Mahbas Al Jan. Phone +966 12 529 8822. Two Agoda bookings: 18 to 24 Nov and 24 to 25 Nov. Free 24/7 shuttle to the Haram."],
+ ["Madinah hotel","Al Ayniah Hotel","Prince Abdul Majeed St, Al Anbariyah. Phone +966 557722180. Booked on Booking.com. Check-in 16:00 to 18:00 on 25 Nov. SAR 988.76 paid at the hotel."],
+ ["Trains","Haramain High Speed Railway","19 Nov 06:05 train 05065, coach 9 seat 255. 25 Nov 11:20 train 01112, coach 9 seat 243. Tickets in Apple Wallet."],
+ ["Visa","Saudi tourist e-visa","Multiple entry, valid to 31 Jul 2027, up to 90 days."],
+ ["Permits","Nusuk","Umrah: Thu 19 Nov, 14:01. Rawdah: Thu 26 Nov, 02:00, gate 37."],
+ ["SIM","If you still need one","Jeddah airport kiosks (only before 05:15), or STC and Mobily shops on floor P3 of the Clock Tower. Ask for a visitor plan of 15 to 20 GB for at least 14 days."],
+ ["Zamzam","Royal Jordanian rule","One sealed 5 L bottle per passenger, free and on top of your allowance. Buy it at Madinah airport and hand it in at check-in."]
+];
+
+/* ---------- State (kept on this device only) ---------- */
+let S={done:{},actual:{},tawaf:0,sai:0,list:"z"};
+function load(){try{const t=localStorage.getItem("umrah-companion");if(t)S=Object.assign(S,JSON.parse(t));}catch(e){}}
+function save(){try{localStorage.setItem("umrah-companion",JSON.stringify(S));}catch(e){}}
+
+/* ---------- Helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function riyadhNow(){
+  const p=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Riyadh",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false}).formatToParts(new Date());
+  const g=t=>p.find(x=>x.type===t).value;
+  return {date:`${g("year")}-${g("month")}-${g("day")}`,hm:`${g("hour")==="24"?"00":g("hour")}:${g("minute")}`};
+}
+function todayIndex(){const d=riyadhNow().date;return DAYS.findIndex(x=>x.date===d);}
+function fmtEUR(v){return "€"+v.toLocaleString("en-GB",{minimumFractionDigits:0,maximumFractionDigits:0});}
+
+function itemHTML(key,time,what,det,ref,isKey,next){
+  const done=S.done[key];
+  return `<div class="item${isKey?" key":""}${done?" done":""}${next?" next":""}">
+    <div class="time">${esc(time)}</div>
+    <div><div class="what">${esc(what)}</div>${det?`<div class="det">${esc(det)}</div>`:""}${ref?`<span class="ref">${esc(ref)}</span>`:""}</div>
+    <button class="tick" data-k="${key}" aria-label="Mark done">${CHECK}</button></div>`;
+}
+function simpleHTML(key,what,det){
+  const done=S.done[key];
+  return `<div class="item simple${done?" done":""}"><div><div class="what">${esc(what)}</div>${det?`<div class="det">${esc(det)}</div>`:""}</div>
+    <button class="tick" data-k="${key}" aria-label="Mark done">${CHECK}</button></div>`;
+}
+function dayList(i,highlightNext){
+  const d=DAYS[i];let nextIdx=-1;
+  if(highlightNext){
+    const hm=riyadhNow().hm;
+    nextIdx=d.items.findIndex((it,j)=>!S.done[d.id+"-"+j]&&(!/^\d\d:\d\d/.test(it[0])||it[0]>=hm));
+  }
+  return `<div class="list">${d.items.map((it,j)=>itemHTML(d.id+"-"+j,it[0],it[1],it[2],it[3],it[4],j===nextIdx)).join("")}</div>`;
+}
+
+/* ---------- Header ---------- */
+function renderHeader(){
+  const n=riyadhNow(),ti=todayIndex();
+  $("#clock").innerHTML=`Saudi time<br><b>${n.hm}</b>`;
+  let st;
+  if(ti>0){st=`${DAYS[ti].title.split(" · ")[0]} of 13 · ${DAYS[ti].city}`;}
+  else if(n.date<"2026-11-18"){const ms=new Date("2026-11-18T00:00:00+03:00")-new Date();const dd=Math.ceil(ms/86400000);st=`${dd} day${dd===1?"":"s"} until you fly`;}
+  else st="Trip complete. Umrah mubarak.";
+  $("#status").textContent=st;
+  $("#track").innerHTML=DAYS.slice(1).map((d,k)=>`<span class="${k+1<ti?"past":k+1===ti?"now":""}"></span>`).join("");
+}
+
+/* ---------- Views ---------- */
+let planDay=null;
+function renderToday(){
+  const ti=todayIndex();const i=ti>0?ti:0;const d=DAYS[i];
+  const total=d.items.length,doneN=d.items.filter((_,j)=>S.done[d.id+"-"+j]).length;
+  let html=`<h2>${esc(d.title)}</h2><div class="progress">${doneN} of ${total} done</div>${dayList(i,ti>0)}`;
+  if(ti<=0&&riyadhNow().date<"2026-11-18"){html+=`<h3>First travel day</h3>${dayList(1,false)}`;}
+  else if(ti>0&&ti<DAYS.length-1){html+=`<h3>Tomorrow · ${esc(DAYS[ti+1].title.split(" · ")[1])}</h3>`+DAYS[ti+1].items.slice(0,2).map(it=>`<div class="card"><div class="what">${esc(it[0])} · ${esc(it[1])}</div></div>`).join("");}
+  $("#v-today").innerHTML=html;
+}
+function renderPlan(){
+  if(planDay===null){const ti=todayIndex();planDay=ti>0?ti:0;}
+  const ti=todayIndex();
+  $("#dayChips").innerHTML=DAYS.map((d,i)=>`<button class="chip${i===planDay?" on":""}${i===ti?" today":""}" data-day="${i}">${esc(d.label)}</button>`).join("");
+  $("#dayList").innerHTML=`<h3 style="margin-top:4px">${esc(DAYS[planDay].title)}</h3>`+dayList(planDay,planDay===ti);
+}
+function renderLists(){
+  const isZ=S.list==="z";$("#segZ").classList.toggle("on",isZ);$("#segP").classList.toggle("on",!isZ);
+  const groups=isZ?ZIY:PACK;let all=0,dn=0,html="";
+  groups.forEach((g,gi)=>{
+    html+=`<h3>${esc(g[0])}</h3><div class="list">`;
+    g[1].forEach((it,j)=>{const k=(isZ?"z":"p")+gi+"-"+j;all++;if(S.done[k])dn++;html+=simpleHTML(k,it[0],it[1]);});
+    html+="</div>";
+  });
+  $("#listProg").textContent=`${dn} of ${all} ${isZ?"visited":"packed"}`;
+  $("#listBody").innerHTML=html;
+}
+function renderMoney(){
+  const eur=b=>b[3]==="EUR"?b[2]:b[2]/RATE;
+  const sum=f=>BUDGET.filter(f).reduce((a,b)=>a+eur(b),0);
+  const paid=sum(b=>b[1]==="Paid"),card=sum(b=>b[1].startsWith("Card")),hotel=sum(b=>b[1]==="Pay at hotel"),est=sum(b=>b[1]==="Estimate"),opt=sum(b=>b[1]==="Optional");
+  const total=paid+card+hotel+est;
+  const actual=Object.values(S.actual).reduce((a,v)=>a+(parseFloat(v)||0),0);
+  let html=`<div class="tiles">
+    <div class="tile hero"><span>Planned total (without Taif)</span><b>${fmtEUR(total)}</b></div>
+    <div class="tile"><span>Already paid</span><b>${fmtEUR(paid)}</b></div>
+    <div class="tile"><span>Card charges coming</span><b>${fmtEUR(card)}</b></div>
+    <div class="tile"><span>Pay at Madinah hotel</span><b>${fmtEUR(hotel)}</b></div>
+    <div class="tile"><span>Spending in Saudi</span><b>${fmtEUR(est)}</b></div>
+    <div class="tile"><span>Spent so far (your entries)</span><b>${fmtEUR(actual)}</b></div>
+    <div class="tile"><span>Taif, if you go</span><b>${fmtEUR(opt)}</b></div>
+  </div><div class="hint">Rate 4.33 SAR per euro. Type what you actually spent (in €) under each item.</div><h3>Items</h3><div class="list">`;
+  BUDGET.forEach((b,i)=>{
+    const plan=eur(b),a=S.actual[i];const diff=a!==undefined&&a!==""?(parseFloat(a)-plan):null;
+    html+=`<div class="money"><div class="what">${esc(b[0])}<span class="badge">${esc(b[1])}</span></div><div class="amt">${fmtEUR(plan)}</div>
+      <div class="sub">${b[3]==="SAR"?esc(b[2].toLocaleString("en-GB"))+" SAR · ":""}<label for="act${i}">Actual €</label><input id="act${i}" inputmode="decimal" data-a="${i}" value="${a!==undefined?esc(a):""}">
+      ${diff!==null&&!isNaN(diff)?`<span class="${diff>0?"over":"under"}">${diff>0?"+":""}${fmtEUR(diff).replace("€-","-€")}</span>`:""}</div></div>`;
+  });
+  $("#moneyBody").innerHTML=html+"</div>";
+}
+function renderInfo(){
+  $("#infoBody").innerHTML=INFO.map(x=>`<div class="card"><h3 style="margin:0 0 4px">${esc(x[0])}</h3><div class="what">${esc(x[1])}</div><div class="det">${esc(x[2])}</div></div>`).join("")+
+  `<div class="card"><div class="what">Full plan and sources</div><div class="det">Your Google Sheet has every detail and source link, and works offline in the Google Sheets app.</div><a href="${SHEET}">Open Umrah Plan sheet</a></div>
+   <div class="hint">Booking numbers, visa number and PNR are left out of this app on purpose; they are in your Google Sheet. Ticks and amounts are saved on this phone only.</div>`;
+}
+function counterHTML(id,name,n,hint){
+  const dirs=["Start at Safa","Safa → Marwa","Marwa → Safa"];
+  let dir="";
+  if(id==="sai"){dir=n>=7?"Finished at Marwa":n===0?"Start at Safa, walk to Marwa":(n%2===0?"Round "+(n+1)+": Safa → Marwa":"Round "+(n+1)+": Marwa → Safa");}
+  else dir=n>=7?"Tawaf complete. Pray 2 rak'ah behind Maqam Ibrahim.":"Round "+(n+1)+": start at the Black Stone line";
+  return `<div class="counter"><div class="top"><div class="name">${name}</div><div class="of">${n} / 7</div></div>
+    <div class="dir">${esc(dir)}</div>
+    <div class="rounds">${[1,2,3,4,5,6,7].map(r=>`<i class="${r<=n?"done":""}">${r}</i>`).join("")}</div>
+    <button class="big" data-inc="${id}" ${n>=7?"disabled":""}>${n>=7?"Done":"Round "+(n+1)+" finished"}</button>
+    <div class="row"><button class="ghost" data-undo="${id}">Undo last</button><button class="ghost" data-reset="${id}">Reset</button></div>
+    <div class="hint">${esc(hint)}</div></div>`;
+}
+function renderRounds(){
+  $("#counters").innerHTML=counterHTML("tawaf","Tawaf",S.tawaf,"Keep the Kaaba on your left. Each round starts and ends at the Black Stone corner, marked by a green light.")+
+    counterHTML("sai","Sa'i",S.sai,"Safa to Marwa counts as one, Marwa back to Safa as two. Men walk faster between the green lights.");
+}
+
+/* ---------- Navigation and events ---------- */
+const VIEWS=["today","plan","rounds","lists","money","info"];
+let current="today";
+function show(v){
+  if(!VIEWS.includes(v))v="today";current=v;
+  document.querySelectorAll(".view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  renderAll();$("#main").scrollTop=0;
+  if(location.hash!=="#"+v&&!(v==="today"&&!location.hash))history.replaceState(null,"","#"+v);
+}
+function renderAll(){
+  renderHeader();
+  ({today:renderToday,plan:renderPlan,rounds:renderRounds,lists:renderLists,money:renderMoney,info:renderInfo})[current]();
+}
+document.addEventListener("click",e=>{
+  const t=e.target.closest("button");if(!t)return;
+  if(t.dataset.v){show(t.dataset.v);return;}
+  if(t.dataset.k){S.done[t.dataset.k]=!S.done[t.dataset.k];save();renderAll();return;}
+  if(t.dataset.day){planDay=+t.dataset.day;renderPlan();return;}
+  if(t.dataset.inc){S[t.dataset.inc]=Math.min(7,S[t.dataset.inc]+1);save();renderRounds();if(navigator.vibrate)try{navigator.vibrate(30)}catch(_){};return;}
+  if(t.dataset.undo){S[t.dataset.undo]=Math.max(0,S[t.dataset.undo]-1);save();renderRounds();return;}
+  if(t.dataset.reset){S[t.dataset.reset]=0;save();renderRounds();return;}
+  if(t.id==="segZ"){S.list="z";save();renderLists();return;}
+  if(t.id==="segP"){S.list="p";save();renderLists();return;}
+});
+document.addEventListener("change",e=>{
+  const a=e.target.dataset&&e.target.dataset.a;if(a===undefined)return;
+  const v=e.target.value.replace(",",".").trim();
+  if(v==="")delete S.actual[a];else S.actual[a]=v;save();renderMoney();
+});
+window.addEventListener("hashchange",()=>show(location.hash.slice(1)));
+
+function start(data){
+  load();
+  if(data&&data.S)S=Object.assign(S,data.S);
+  window.claude?.hot?.snapshot?.(()=>({S}));
+  show(location.hash.slice(1)||"today");
+  setInterval(renderHeader,30000);
+}
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{});});}
+</script>
+</body>
+</html>
