@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Umrah Companion</title>
-<meta name="theme-color" content="#FFFFFF">
+<meta name="theme-color" content="#0F3B36">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Umrah">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -32,18 +32,23 @@ html{background:#ECECE7}
 body{max-width:560px;margin:0 auto;box-shadow:0 0 0 1px #E0E0DA,0 20px 60px rgba(15,59,54,.06);background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;display:flex;flex-direction:column}
 button{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-header{background:var(--surface);color:var(--ink);padding:calc(8px + env(safe-area-inset-top)) 16px 0;position:relative}
+header{background:linear-gradient(180deg,#0F3B36,#0C322E);color:#fff;padding:calc(8px + env(safe-area-inset-top)) 16px 0;position:relative}
 .brand{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.brand h1{font-family:var(--display);font-weight:600;font-size:19px;line-height:1.1;margin:0;color:var(--brand)}
-.clock{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;text-align:right;line-height:1.3}
-.clock b{display:block;font-size:16px;color:var(--brand);font-weight:600}
-.status{margin-top:1px;font-size:12.5px;color:var(--muted)}
+.brand h1{font-family:var(--display);font-weight:600;font-size:18px;line-height:1.1;margin:0;color:var(--champ);letter-spacing:.3px}
+.clock{font-size:11px;color:rgba(255,255,255,.6);font-variant-numeric:tabular-nums;text-align:right;line-height:1.3}
+.clock b{display:block;font-size:16px;color:#fff;font-weight:600}
+.status{margin-top:2px;font-size:13px;color:rgba(255,255,255,.75)}
+.status b{color:#fff;font-weight:600}
+.salah{display:flex;align-items:baseline;gap:8px;margin-top:8px;padding:7px 11px;border-radius:10px;background:rgba(255,255,255,.07);border:1px solid rgba(230,211,163,.22);font-variant-numeric:tabular-nums}
+.salah span{font-size:11.5px;color:rgba(255,255,255,.6);flex:1}
+.salah b{color:var(--champ);font-size:15px;font-weight:700}
+.salah em{font-style:normal;font-size:12.5px;color:#fff}
 .track{display:flex;gap:4px;margin:7px 0 8px;align-items:center}
-.track span{width:6px;height:6px;transform:rotate(45deg);border:1.2px solid #CDBB8E;flex:0 0 auto}
-.track span.past{background:#CDBB8E}
-.track span.now{background:var(--gold);border-color:var(--gold);width:8px;height:8px}
+.track span{width:6px;height:6px;transform:rotate(45deg);border:1.2px solid rgba(230,211,163,.55);flex:0 0 auto}
+.track span.past{background:rgba(230,211,163,.55)}
+.track span.now{background:var(--champ);border-color:var(--champ);width:8px;height:8px}
 .track em{font-style:normal;font-size:12px;color:var(--muted);margin-left:6px}
-.hizam{height:8px;background-size:auto 8px!important;margin:0 -18px;opacity:.55;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='12' viewBox='0 0 28 12'%3E%3Cg fill='none' stroke='%23A6843E' stroke-width='.8'%3E%3Crect x='10' y='2' width='8' height='8' transform='rotate(45 14 6)'/%3E%3Cpath d='M0 6h8M20 6h8'/%3E%3C/g%3E%3C/svg%3E") repeat-x center;border-bottom:1px solid var(--line)}
+.hizam{height:8px;background-size:auto 8px!important;margin:0 -18px;opacity:.5;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='12' viewBox='0 0 28 12'%3E%3Cg fill='none' stroke='%23E6D3A3' stroke-width='.8'%3E%3Crect x='10' y='2' width='8' height='8' transform='rotate(45 14 6)'/%3E%3Cpath d='M0 6h8M20 6h8'/%3E%3C/g%3E%3C/svg%3E") repeat-x center;border-bottom:0}
 main{flex:1;overflow-y:auto;padding:18px 16px 28px;-webkit-overflow-scrolling:touch}
 .view{display:none;max-width:640px;margin:0 auto}
 .view.on{display:block}
@@ -235,6 +240,7 @@ table.t tr.win td{color:var(--ok);font-weight:700}
 <body>
 <header>
   <div class="brand"><div><h1>Umrah Companion</h1><div class="status" id="status"></div></div><div class="clock" id="clock"></div></div>
+  <div class="salah" id="salah"></div>
   <div class="track" id="track" aria-hidden="true"></div>
   <div class="hizam" aria-hidden="true"></div>
 </header>
@@ -466,17 +472,48 @@ function dayList(i,highlightNext){
   return `<div class="list">${its.map(x=>itemHTML(x.key,x.it[0],x.it[1],x.it[2],x.it[3],x.it[4],x.key===nk,x.mine?d.id+":"+x.mine:null)).join("")}</div>`;
 }
 
+/* ---------- Prayer times (Umm al-Qura: Fajr 18.5°, Isha 90 min after Maghrib) ---------- */
+function prayerTimes(dateStr,lat,lng,tz){
+  const rad=Math.PI/180,[y,m,d]=dateStr.split("-").map(Number);
+  const a=Math.floor((14-m)/12),yy=y+4800-a,mm=m+12*a-3;
+  const jd=d+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045-0.5+(12-tz)/24;
+  const D=jd-2451545,g=(357.529+0.98560028*D)*rad,q=280.459+0.98564736*D;
+  const L=(q+1.915*Math.sin(g)+0.020*Math.sin(2*g))*rad,e=(23.439-0.00000036*D)*rad;
+  const RA=Math.atan2(Math.cos(e)*Math.sin(L),Math.cos(L))/rad/15,dec=Math.asin(Math.sin(e)*Math.sin(L));
+  const fix=h=>((h%24)+24)%24,EqT=q/15-fix(RA);const eq=EqT-24*Math.round(EqT/24);
+  const noon=12+tz-lng/15-eq,la=lat*rad;
+  const T=alt=>Math.acos((Math.sin(alt*rad)-Math.sin(dec)*Math.sin(la))/(Math.cos(dec)*Math.cos(la)))/rad/15;
+  const asrAlt=Math.atan(1/(1+Math.tan(Math.abs(la-dec))))/rad;
+  const mg=noon+T(-0.833);
+  return {Fajr:noon-T(-18.5),Sunrise:noon-T(-0.833),Dhuhr:noon,Asr:noon+T(asrAlt),Maghrib:mg,Isha:mg+1.5};
+}
+const CITY={Makkah:[21.4225,39.8262],Madinah:[24.4672,39.6111]};
+const hm2min=h=>Math.round(h*60);
+function addDays(ds,n){const d=new Date(ds+"T12:00:00Z");d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10);}
+function nextSalah(city,date,hm){
+  const [la,ln]=CITY[city],now=+hm.slice(0,2)*60+ +hm.slice(3);
+  const t=prayerTimes(date,la,ln,3);
+  for(const k of ["Fajr","Dhuhr","Asr","Maghrib","Isha"]){const m=hm2min(t[k]);if(m>now)return {k,m,left:m-now};}
+  const f=hm2min(prayerTimes(addDays(date,1),la,ln,3).Fajr);return {k:"Fajr",m:f,left:f+1440-now};
+}
+const clk=m=>String(Math.floor(m/60)%24).padStart(2,"0")+":"+String(m%60).padStart(2,"0");
 /* ---------- Header ---------- */
 function renderHeader(){
   const n=riyadhNow(),ti=todayIndex();
   $("#clock").innerHTML=`<b>${n.hm}</b>Saudi time`;
+  const dl=new Date(n.date+"T12:00:00Z").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",timeZone:"UTC"});
+  const city=ti>0&&CITY[DAYS[ti].city]?DAYS[ti].city:(n.date>"2026-11-24"?"Madinah":"Makkah");
   let st;
-  if(ti>0){st=`${DAYS[ti].title.split(" · ")[0]} of 13`;}
-  else if(n.date<"2026-11-18"){const ms=new Date("2026-11-18T00:00:00+03:00")-new Date();const dd=Math.ceil(ms/86400000);st=`${dd} day${dd===1?"":"s"} until you fly`;}
-  else st="Trip complete. Umrah mubarak.";
-  $("#status").textContent=st;
+  if(n.date<"2026-11-18"){const dd=Math.round((new Date("2026-11-19T12:00:00Z")-new Date(n.date+"T12:00:00Z"))/86400000);st=`Makkah in ${dd} days`;}
+  else if(n.date==="2026-11-18")st="Travel day";
+  else if(n.date<="2026-11-30"){const first=city==="Makkah"?"2026-11-19":"2026-11-25";
+    const k=Math.round((new Date(n.date+"T12:00:00Z")-new Date(first+"T12:00:00Z"))/86400000)+1;st=`Day ${k} in ${city}`;}
+  else st="Umrah mubarak";
+  $("#status").innerHTML=`${dl} · <b>${st}</b>`;
+  const ns=nextSalah(city,n.date,n.hm),h=Math.floor(ns.left/60),m=ns.left%60;
+  $("#salah").innerHTML=`<span>Next salah · ${city}</span><b>${ns.k} ${clk(ns.m)}</b><em>in ${h?h+" h ":""}${m} min</em>`;
   document.body.dataset.city=ti>0?DAYS[ti].city:"";
-  $("#track").innerHTML=DAYS.slice(1).map((d,k)=>`<span class="${k+1<ti?"past":k+1===ti?"now":""}"></span>`).join("")+(ti>0?`<em>${esc(DAYS[ti].city)}</em>`:"");
+  $("#track").innerHTML=DAYS.slice(1).map((d,k)=>`<span class="${k+1<ti?"past":k+1===ti?"now":""}"></span>`).join("");
 }
 
 /* ---------- Views ---------- */
