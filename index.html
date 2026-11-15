@@ -198,7 +198,7 @@ table.t tr.win td{color:var(--ok);font-weight:700}
 .shop{background:var(--surface);box-shadow:0 1px 2px rgba(22,25,28,.04);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
 .shop.win{border:2px solid var(--ok)}
 .shoph{display:flex;align-items:center;gap:8px}
-.shoph .nm{flex:1;border:0;border-bottom:1px dashed var(--line);background:transparent;color:var(--ink);font:inherit;font-weight:700;font-size:17px;padding:4px 0}
+.shoph .nm{flex:1;min-width:0;border:0;border-bottom:1px dashed var(--line);background:transparent;color:var(--ink);font:inherit;font-weight:700;font-size:17px;padding:4px 0}
 .tag{font-size:12px;font-weight:700;background:var(--ok);color:#fff;border-radius:999px;padding:2px 9px}
 .grid4{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;margin-top:10px}
 .grid4 label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
@@ -212,6 +212,16 @@ table.t tr.win td{color:var(--ok);font-weight:700}
 .sum b{font-size:18px}
 .sum b.e{margin-left:auto;color:var(--accent)}
 .addrow{width:100%;border:1.5px dashed var(--line);background:transparent;border-radius:14px;padding:13px;font-weight:700;cursor:pointer;color:var(--accent);margin-bottom:6px}
+.field input.wide{flex:1;min-width:160px;width:auto}
+.dl{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.fday{display:grid;grid-template-columns:96px 1fr 76px;gap:10px;align-items:center;font-size:14px;padding:5px 0;font-variant-numeric:tabular-nums}
+.fday .bar{margin:0}.fday b{text-align:right}
+.tp{margin-top:10px}
+.ph{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.upl{cursor:pointer;color:var(--brand)}
+.thumb{border:1px solid var(--line);border-radius:10px;padding:0;overflow:hidden;background:none;cursor:zoom-in;width:64px;height:64px}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb.zoom{width:100%;height:auto;cursor:zoom-out}.thumb.zoom img{height:auto;object-fit:contain}
 @media (max-width:360px){.stats{grid-template-columns:1fr 1fr}.grid4{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:no-preference){.tick,.pill,.chip{transition:background .15s,border-color .15s,color .15s}}
 </style>
@@ -397,7 +407,7 @@ const INFO=[
 let S={done:{},act:{},ex:[],tawaf:0,sai:0,list:"z",
   rates:{SAR:4.192,BDT:137.48,t:"15 Nov 2026 (saved)"},gold:{usd:3866.51,t:"12 Nov 2026 (saved)"},
   conv:{amt:"100",cur:"SAR"},cmpEur:"200",cmp:["","",""],exEur:"200",exRate:"",exWhere:"Makkah",gw:"50",gk:22,
-  extra:[],newCat:"Food",newV:"",newC:"SAR",open:{},
+  extra:[],newCat:"Food",newV:"",newC:"SAR",newN:"",newD:"",exFee:"",exFeeC:"SAR",exFinal:"",open:{},
   shops:[
    {name:"Germany dealer",cur:"EUR",price:"",mk:"",mkT:"%",vat:"0",vatOn:"all",prem:3,note:"Bars and coins: no VAT. For jewellery set VAT 19% and add making."},
    {name:"Bangladesh (BAJUS)",cur:"BDT",price:"",mk:"",mkT:"%",vat:"0",vatOn:"all",note:"BAJUS price already includes 5% VAT."},
@@ -409,7 +419,7 @@ function load(){try{const t=localStorage.getItem("umrah-companion");if(t)S=Objec
   /* Items marked "Done" in the plan start ticked (once). */
   ["extra","shops","ex"].forEach(k=>{if(!Array.isArray(S[k]))delete S[k];});
   if(!S.seeded){DAYS.forEach(d=>d.items.forEach((it,j)=>{if(it[0]==="Done")S.done[d.id+"-"+j]=true;}));S.seeded=1;}}
-function save(){try{localStorage.setItem("umrah-companion",JSON.stringify(S));}catch(e){}}
+function save(){try{localStorage.setItem("umrah-companion",JSON.stringify(S));return true;}catch(e){return false;}}
 
 /* ---------- Helpers ---------- */
 const $=s=>document.querySelector(s);
@@ -491,7 +501,18 @@ function renderLists(){
   $("#listProg").innerHTML=`<div class="bar"><i style="width:${all?Math.round(dn/all*100):0}%"></i></div><div class="progress">${dn} of ${all} ${isZ?"places visited":"items packed"}</div>`;
   $("#listBody").innerHTML=html;
 }
-function actRate(){const e=S.ex.reduce((a,x)=>a+(+x.eur||0),0),r=S.ex.reduce((a,x)=>a+(+x.eur||0)*(+x.rate||0),0);return e>0?r/e:RATE;}
+const exSar=x=>x.sar!=null?+x.sar:(+x.eur||0)*(+x.rate||0);
+function actRate(){const e=S.ex.reduce((a,x)=>a+(+x.eur||0),0),r=S.ex.reduce((a,x)=>a+exSar(x),0);return e>0?r/e:RATE;}
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
+const fmtDay=d=>d?new Date(d+"T12:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"}):"No date";
+/* exchange preview: what you really get after the fee */
+function exCalc(){
+  const eur=num(S.exEur)||0,r=num(S.exRate),fee=num(S.exFee)||0,fin=num(S.exFinal);
+  if(fin)return {eur,sar:eur*fin,final:fin,over:true};
+  if(!r)return null;
+  const sar=eur*r-(S.exFeeC==="SAR"?fee:0),paid=eur+(S.exFeeC==="EUR"?fee:0);
+  return {eur:paid,sar,final:paid?sar/paid:0,over:false,shop:r,fee};
+}
 function fmtNum(v,d=0){return (+v).toLocaleString("en-GB",{minimumFractionDigits:d,maximumFractionDigits:d});}
 const num=v=>{const n=parseFloat(String(v??"").replace(",","."));return isNaN(n)?null:n;};
 /* Items already paid start with their real price; you can change it. */
@@ -508,7 +529,7 @@ function renderMoney(){
   const spentItems=BUDGET.reduce((t,b)=>{const a=getAct(b);return t+(toE(num(a.v),a.c)||0);},0);
   const spentExtra=S.extra.reduce((t,x)=>t+(toE(num(x.v),x.c)||0),0);
   const spent=spentItems+spentExtra;
-  const exE=S.ex.reduce((a,x)=>a+(+x.eur||0),0),exS=S.ex.reduce((a,x)=>a+(+x.eur||0)*(+x.rate||0),0);
+  const exE=S.ex.reduce((a,x)=>a+(+x.eur||0),0),exS=S.ex.reduce((a,x)=>a+exSar(x),0);
   const plan=paid+est;
   let html=`<div class="hero"><div><span>Spent so far</span><b>${fmtEUR(spent)}</b></div><div class="r"><span>of planned</span><b>${fmtEUR(plan)}</b></div>
     <div class="bar dark"><i style="width:${Math.min(100,plan?Math.round(spent/plan*100):0)}%"></i></div></div>
@@ -522,17 +543,28 @@ function renderMoney(){
   </div>
   <h3>Add an expense</h3><div class="box">
     <div class="pills">${CATS.map(c=>`<button class="pill${S.newCat===c?" on":""}" data-newcat="${c}">${c}</button>`).join("")}</div>
-    <div class="field"><input id="newV" inputmode="decimal" placeholder="Amount" data-f="newV" value="${esc(S.newV)}">${curSeg("data-newc","x",S.newC)}<button class="pill solid" data-addx="1">Add</button></div>
-    ${S.extra.length?`<div class="xl">${S.extra.map((x,i)=>`<div class="ex"><span><b>${esc(x.cat)}</b> · ${fmtNum(num(x.v),2)} ${x.c}${x.c==="SAR"?` <small>(${fmtEUR(toE(num(x.v),"SAR"))})</small>`:""}</span><button class="x" data-xdel="${i}" aria-label="Delete ${esc(x.cat)} expense">×</button></div>`).join("")}</div>`:`<div class="hint">Tap a category, type the amount, tap Add. It counts in "Spent so far".</div>`}
+    <div class="field"><input id="newV" inputmode="decimal" placeholder="Amount" data-f="newV" value="${esc(S.newV)}">${curSeg("data-newc","x",S.newC)}<input type="date" id="newD" data-f="newD" value="${esc(S.newD||today())}" style="width:auto"></div>
+    <div class="field"><input id="newN" class="wide" placeholder="Note, e.g. Al Baik lunch" data-f="newN" value="${esc(S.newN)}"><button class="pill solid" data-addx="1">Add</button></div>
+    ${S.extra.length?`<div class="xl">${S.extra.map((x,i)=>({x,i})).sort((a,b)=>(b.x.d||"").localeCompare(a.x.d||"")).map(({x,i})=>`<div class="ex"><span><b>${esc(x.cat)}</b> · ${fmtNum(num(x.v),2)} ${x.c}${x.c==="SAR"?` <small>(${fmtEUR(toE(num(x.v),"SAR"))})</small>`:""}<small class="dl">${fmtDay(x.d)}${x.n?" · "+esc(x.n):""}</small></span><button class="x" data-xdel="${i}" aria-label="Delete ${esc(x.cat)} expense">×</button></div>`).join("")}</div>`:`<div class="hint">Tap a category, type the amount, tap Add. It counts in "Spent so far".</div>`}
   </div>
+  ${(()=>{const food={};S.extra.filter(x=>x.cat==="Food").forEach(x=>{const v=num(x.v)||0;const sar=x.c==="SAR"?v:v*ar;food[x.d||""]=(food[x.d||""]||0)+sar;});
+    const days=Object.keys(food).sort().reverse();if(!days.length)return "";
+    const tot=days.reduce((a,d)=>a+food[d],0);
+    return `<h3>Food by day</h3><div class="box"><div class="hint" style="margin:0 0 8px">Budget 65 SAR a day. Average so far ${fmtNum(tot/days.length)} SAR.</div>${days.map(d=>{const v=food[d];return `<div class="fday"><span>${fmtDay(d)}</span><div class="bar"><i style="width:${Math.min(100,v/65*100)}%;${v>65?"background:var(--warn)":""}"></i></div><b class="${v>65?"over":""}">${fmtNum(v)} SAR</b></div>`;}).join("")}</div>`;})()}
   <h3>Money exchanged</h3><div class="box">
-    <div class="res"><div class="k">Your rate</div><div class="v">${S.ex.length?fmtNum(ar,4)+" SAR per €":"none yet, plan uses "+RATE}</div>
+    <div class="res"><div class="k">Your average rate</div><div class="v">${S.ex.length?fmtNum(ar,4)+" SAR per €":"none yet, plan uses "+RATE}</div>
     <div class="k">Exchanged</div><div class="v">€${fmtNum(exE)} = ${fmtNum(exS)} SAR</div></div>
-    ${S.ex.map((x,i)=>`<div class="ex"><span>${esc(x.where)} · €${fmtNum(x.eur)} at ${fmtNum(x.rate,2)} = <b>${fmtNum(x.eur*x.rate)} SAR</b></span><button class="x" data-exdel="${i}" aria-label="Delete exchange">×</button></div>`).join("")}
-    <div class="pills" style="margin-top:10px">${[50,100,200,300,500].map(v=>`<button class="pill${S.exEur==v?" on":""}" data-exeur="${v}">€${v}</button>`).join("")}</div>
-    <div class="pills" style="margin-top:8px">${["Makkah","Madinah","ATM"].map(v=>`<button class="pill${S.exWhere===v?" on":""}" data-exwhere="${v}">${v}</button>`).join("")}</div>
-    <div class="field"><input id="exRate" inputmode="decimal" placeholder="Rate, e.g. 4.20" data-f="exRate" value="${esc(S.exRate)}"><button class="pill solid" data-exadd="1">Add exchange</button></div>
-    ${num(S.exRate)?`<div class="hint">€${S.exEur} gives ${fmtNum(S.exEur*num(S.exRate))} SAR.</div>`:""}
+    ${S.ex.map((x,i)=>`<div class="ex"><span>${esc(x.where)} · €${fmtNum(x.eur)} → <b>${fmtNum(exSar(x))} SAR</b><small class="dl">Final rate ${fmtNum(x.rate,3)}${x.shop?` · shop rate ${fmtNum(x.shop,2)}`:""}${x.fee?` · fee ${fmtNum(x.fee,2)} ${x.feeC}`:""}${x.over?" · typed directly":""}</small></span><button class="x" data-exdel="${i}" aria-label="Delete exchange">×</button></div>`).join("")}
+    <div class="pills" style="margin-top:12px">${[50,100,200,300,500].map(v=>`<button class="pill${S.exEur==v?" on":""}" data-exeur="${v}">€${v}</button>`).join("")}</div>
+    <div class="pills" style="margin-top:8px">${["Makkah","Madinah","Airport","ATM"].map(v=>`<button class="pill${S.exWhere===v?" on":""}" data-exwhere="${v}">${v}</button>`).join("")}</div>
+    <div class="grid4">
+      <label>Euros<input inputmode="decimal" data-f="exEur" value="${esc(S.exEur)}"></label>
+      <label>Rate shown<input id="exRate" inputmode="decimal" placeholder="e.g. 4.20" data-f="exRate" value="${esc(S.exRate)}"></label>
+      <label>Fee, if any<span class="inl"><input inputmode="decimal" placeholder="0" data-f="exFee" value="${esc(S.exFee)}">${curSeg("data-exfeec","x",S.exFeeC)}</span></label>
+      <label>Final rate (optional)<input inputmode="decimal" placeholder="overrides" data-f="exFinal" value="${esc(S.exFinal)}"></label>
+    </div>
+    ${(()=>{const c=exCalc();return c?`<div class="sum"><span>${c.over?"Using the final rate you typed":`€${fmtNum(c.eur,2)} paid, fee included`}</span><b>${fmtNum(c.sar,2)} SAR</b><b class="e">${fmtNum(c.final,4)}</b></div>`:`<div class="hint">Type the rate shown and any fee, or type the final rate directly.</div>`;})()}
+    <button class="big" data-exadd="1" style="margin-top:12px;padding:13px;font-size:16px">Add exchange</button>
   </div>
   <h3>Planned items</h3><div class="hint" style="margin:-4px 0 6px">Type what you paid and pick SAR or EUR.</div><div class="list">`;
   BUDGET.forEach((b,i)=>{
@@ -551,6 +583,15 @@ function autoPrice(o,k){            /* price per gram for karat k, from spot, in
   if(o.cur==="BDT")return BAJUS[k]||g24eur*pur*R.BDT*1.3;
   if(o.cur==="SAR")return g24eur*pur*R.SAR;
   return g24eur*pur*(1+(o.prem??3)/100);
+}
+const GTYPES=["Ring","Chain","Necklace","Bangle","Earrings","Bar / coin"];
+function addPhoto(i,file){
+  const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{
+    const m=640,sc=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement("canvas");
+    c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+    const old=S.shops[i].img;S.shops[i].img=c.toDataURL("image/jpeg",0.7);
+    if(!save()){S.shops[i].img=old;save();alert("Phone storage for the app is full. Remove an older photo first.");}
+    renderTools();};im.src=r.result;};r.readAsDataURL(file);
 }
 function goldRow(o,i,w,k){
   const p=num(o.price),auto=p===null,ppg=auto?autoPrice(o,k):p;
@@ -586,6 +627,9 @@ function renderTools(){
   S.shops.forEach((o,i)=>{const r=res[i];
     html+=`<div class="shop${r.eur===minE?" win":""}">
       <div class="shoph"><input class="nm" aria-label="Shop name" data-sh="${i}" data-k="name" value="${esc(o.name)}">${r.eur===minE?`<span class="tag">Cheapest</span>`:""}<button class="x" data-shdel="${i}" aria-label="Remove ${esc(o.name)}">×</button></div>
+      <div class="pills tp">${GTYPES.map(t=>`<button class="pill sm${o.type===t?" on":""}" data-shtype="${i}" data-t="${t}">${t}</button>`).join("")}</div>
+      <div class="ph">${o.img?`<button class="thumb" data-shzoom="1" aria-label="Show photo larger"><img src="${o.img}" alt="Photo of ${esc(o.name)}"></button><button class="pill sm" data-shimgdel="${i}">Remove photo</button>`:""}
+        <label class="pill sm upl">${o.img?"Change photo":"Add photo"}<input type="file" accept="image/*" data-shimg="${i}" hidden></label></div>
       <div class="grid4">
         <label>Currency<span class="segc">${["SAR","EUR","BDT"].map(c=>`<button class="${o.cur===c?"on":""}" data-shcur="${i}" data-c="${c}">${c}</button>`).join("")}</span></label>
         <label>Price per gram<input inputmode="decimal" data-sh="${i}" data-k="price" value="${esc(o.price)}" placeholder="${fmtNum(r.ppg,o.cur==="BDT"?0:2)} auto"></label>
@@ -656,11 +700,18 @@ document.addEventListener("click",e=>{
   if(d.cur){const b=BUDGET.find(x=>x[0]===d.cur);S.act[d.cur]=Object.assign({},getAct(b),{c:d.c});save();renderMoney();return;}
   if(d.newcat){S.newCat=d.newcat;save();renderMoney();return;}
   if(d.newc){S.newC=d.c;save();renderMoney();return;}
-  if(d.addx){const inp=$("#newV");const v=num(inp?inp.value:S.newV);if(v){S.extra.push({cat:S.newCat,v:String(v),c:S.newC});S.newV="";save();renderMoney();}else if(inp)inp.focus();return;}
+  if(d.addx){const inp=$("#newV");const v=num(inp?inp.value:S.newV);const n=$("#newN"),dt=$("#newD");
+    if(v){S.extra.push({cat:S.newCat,v:String(v),c:S.newC,d:dt&&dt.value?dt.value:today(),n:n?n.value.trim():""});S.newV="";S.newN="";save();renderMoney();}else if(inp)inp.focus();return;}
+  if(d.exfeec){S.exFeeC=d.c;save();renderMoney();return;}
   if(d.xdel){S.extra.splice(+d.xdel,1);save();renderMoney();return;}
   if(d.exeur){S.exEur=+d.exeur;save();renderMoney();return;}
   if(d.exwhere){S.exWhere=d.exwhere;save();renderMoney();return;}
-  if(d.exadd){const inp=$("#exRate");const r=num(inp?inp.value:S.exRate);if(r&&r>0){S.ex.push({eur:+S.exEur,rate:r,where:S.exWhere});S.exRate="";save();renderMoney();}else if(inp)inp.focus();return;}
+  if(d.exadd){document.activeElement&&document.activeElement.blur&&document.activeElement.blur();
+    const c=exCalc();if(c&&c.sar>0){S.ex.push({eur:c.eur,sar:c.sar,rate:c.final,shop:c.shop||null,fee:c.over?0:(num(S.exFee)||0),feeC:S.exFeeC,over:c.over,where:S.exWhere});
+      S.exRate="";S.exFee="";S.exFinal="";save();renderMoney();}else{const i=$("#exRate");if(i)i.focus();}return;}
+  if(d.shtype){const o=S.shops[+d.shtype];o.type=o.type===d.t?"":d.t;save();renderTools();return;}
+  if(d.shimgdel){delete S.shops[+d.shimgdel].img;save();renderTools();return;}
+  if(d.shzoom){t.classList.toggle("zoom");return;}
   if(d.exdel){S.ex.splice(+d.exdel,1);save();renderMoney();return;}
   if(d.conv){S.conv.cur=d.conv;save();renderTools();return;}
   if(d.cmpeur){S.cmpEur=+d.cmpeur;save();renderTools();return;}
@@ -680,8 +731,9 @@ document.addEventListener("change",e=>{
   if(d.a!==undefined){const b=BUDGET.find(x=>x[0]===d.a);S.act[d.a]=Object.assign({},getAct(b),{v:v.replace(",",".")});save();renderMoney();return;}
   if(d.cmp!==undefined){S.cmp[+d.cmp]=v;save();renderTools();return;}
   if(d.sh!==undefined){S.shops[+d.sh][d.k]=v;save();renderTools();return;}
-  if(d.f==="exRate"){S.exRate=v;save();renderMoney();return;}
-  if(d.f==="newV"){S.newV=v;save();return;}
+  if(["exRate","exFee","exFinal","exEur"].includes(d.f)){S[d.f]=v.replace(",",".");save();renderMoney();return;}
+  if(["newV","newN","newD"].includes(d.f)){S[d.f]=v;save();return;}
+  if(d.shimg!==undefined&&e.target.files&&e.target.files[0]){addPhoto(+d.shimg,e.target.files[0]);return;}
   if(d.f==="gw"){S.gw=v;save();renderTools();return;}
 });
 /* live update of the quick converter while typing */
