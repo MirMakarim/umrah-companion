@@ -317,8 +317,10 @@ const DAYS=[
   ["By 17 Nov","Save offline copies","Flight e-ticket, train tickets, hotel confirmations, visa, passport. Download offline maps of Makkah and Madinah.",""],
   ["By 17 Nov","Install and log in to apps","Nusuk, Careem, Uber, Makkah Bus, Haramain train, Booking.com, Agoda, WhatsApp.",""],
   ["17 Nov","Check in online for RJ130 and RJ704","","Royal Jordanian"],
-  ["17 Nov","Pack (see Lists)","Ihram kit goes in the carry-on: you change in Amman.",""]]},
+  ["17 Nov","Pack (see Lists)","Ihram kit goes in the carry-on: you change in Amman.",""],
+  ["By 17 Nov","Top up Lebara: at least €19.99 credit","Needed for the 7 GB Travel Boost on 18 Nov.","Lebara"]]},
  {id:"d1",date:"2026-11-18",label:"Wed 18",title:"Day 1 · To Amman",city:"Germany",items:[
+  ["Morning","Buy Lebara 7 GB Travel Boost LG2 (€19.99)","Lebara app, at home. 4 weeks from today: 7 GB, 50 minutes (incoming and outgoing), 50 SMS. Covers Jordan and Saudi Arabia. Then iPhone Settings → Mobile Service → Lebara → Data Roaming ON.","Lebara"],
   ["10:00","Leave Soest for Düsseldorf airport","Be at the airport by 12:00.",""],
   ["15:00","Flight RJ130 Düsseldorf to Amman","Arrives 21:25 local time.","Royal Jordanian",1],
   ["21:25","Amman layover (4 h 10 min): get ready for ihram","Shower or make wudu, change into ihram, pray 2 rak'ah. Make the niyyah later, at the miqat.",""]]},
@@ -428,7 +430,7 @@ const BUDGET=[
  ["Makkah ziyarah taxi","Estimate",150,"SAR"],
  ["Madinah ziyarah taxi","Estimate",90,"SAR"],
  ["Food, 65 SAR a day for 12 days","Estimate",780,"SAR"],
- ["Saudi SIM","Estimate",70,"SAR"],
+ ["Lebara 7 GB Travel Boost (roaming)","Estimate",19.99,"EUR"],
  ["2 thobes","Estimate",200,"SAR"],
  ["Dates and gifts","Estimate",300,"SAR"],
  ["Barber","Estimate",30,"SAR"],
@@ -446,7 +448,8 @@ const INFO=[
  ["Trains","Haramain High Speed Railway","19 Nov 06:05 train 05065, coach 9 seat 255. 25 Nov 11:20 train 01112, coach 9 seat 243. Tickets in Apple Wallet."],
  ["Visa","Saudi tourist e-visa","Multiple entry, valid to 31 Jul 2027, up to 90 days."],
  ["Permits","Nusuk","Umrah: Thu 19 Nov, 14:01. Rawdah: Thu 26 Nov, 02:00, gate 37."],
- ["SIM","If you still need one","Jeddah airport kiosks (only before 05:15), or STC and Mobily shops on floor P3 of the Clock Tower. Ask for a visitor plan of 15 to 20 GB for at least 14 days."],
+ ["Phone and internet","Lebara 7 GB Travel Boost LG2","€19.99 for 4 weeks, bought on 18 Nov. 7 GB data, 50 minutes and 50 SMS. Minutes count for every call you receive and for calls you make to Saudi or German numbers. Incoming SMS are free. Calls to Bangladesh are not included: use WhatsApp. Settings: Data Roaming ON. If there is no internet, set APN to Vodafone Internet (user and password blank) and restart. Top up another 3 GB for €9.99 in the app if needed. No STC SIM needed."],
+ ["Which internet to use","Speed test first","Open fast.com. Need about 3 Mbps for a video call, 5 Mbps or more to be safe. 1) Hotel Wi-Fi if the test shows 5 Mbps or more. 2) If slower, turn Wi-Fi OFF and use Lebara. 3) Laptop: iPhone Personal Hotspot; on Windows set the hotspot as a metered connection and pause OneDrive. 4) If Lebara is weak too: Settings → Mobile Service → Network Selection, turn off Automatic, try STC, then Mobily. Book interviews in the morning, Saudi time. A 1-hour video call uses about 1 to 1.5 GB."],
  ["Zamzam","Royal Jordanian rule","One sealed 5 L bottle per passenger, free and on top of your allowance. Buy it at Madinah airport and hand it in at check-in."]
 ];
 
@@ -618,7 +621,7 @@ const CATS=["Taxi","Shopping","Gift","Food","Other"];
 const OPEN={};
 const COL={flights:["#2F5D8A","#E7EEF6"],hotels:["#6B4C8A","#EFE9F5"],transport:["#1F7A74","#E2F1EF"],food:["#B7791F","#FBF0DE"],shop:["#A8455E","#F7E6EB"],opt:["#6B7280","#EEEFF1"],other:["#47607A","#E7ECF2"],money:["#2C6B55","#E3F0E9"],gold:["#9A7A33","#F6EEDA"]};
 function blk(id,title,meta,body,c){const k=COL[c]||COL.other;return `<details class="grp col" style="--c:${k[0]};--cs:${k[1]}" data-g="${id}" ${OPEN[id]?"open":""}><summary><span>${title}</span><span class="cnt" id="m-${id}">${meta}</span></summary><div class="grpb pad">${body}</div></details>`;}
-const SECTIONS=[["Flights and visa",[0,1],"flights"],["Hotels",[2,3],"hotels"],["Trains and taxis",[4,5,6,7,8,9,10,11],"transport"],["Food",[12],"food"],["SIM, shopping and services",[13,14,15,16,17,18],"shop"],["Optional",[19,20],"opt"]];
+const SECTIONS=[["Flights and visa",[0,1],"flights"],["Hotels",[2,3],"hotels"],["Trains and taxis",[4,5,6,7,8,9,10,11],"transport"],["Food",[12],"food"],["Phone, shopping and services",[13,14,15,16,17,18],"shop"],["Optional",[19,20],"opt"]];
 const FOOD_DAYS=Array.from({length:12},(_,i)=>addDays("2026-11-19",i));
 const MEALS=[["b","Breakfast"],["l","Lunch"],["d","Dinner"],["o","Other"]];
 const foodDay=d=>{const f=S.food[d]||{};return MEALS.reduce((a,[k])=>a+(num(f[k])||0),0);};
