@@ -869,7 +869,7 @@ if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.s
   var sa=window.navigator.standalone||matchMedia("(display-mode: standalone)").matches;
   if(!sa)return;
   document.documentElement.classList.add("app");
-  function fit(){var h=Math.max(window.innerHeight,screen.height);document.body.style.bottom="auto";document.body.style.height=h+"px";}
+  function fit(){var p=innerHeight>innerWidth;var h=p?Math.max(innerHeight,Math.max(screen.height,screen.width)):innerHeight;document.body.style.bottom="auto";document.body.style.height=h+"px";}
   fit();addEventListener("resize",fit);addEventListener("orientationchange",function(){setTimeout(fit,300)});
 })();
 </script>
