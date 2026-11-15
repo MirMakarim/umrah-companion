@@ -32,18 +32,18 @@ html{background:#ECECE7}
 body{max-width:560px;margin:0 auto;box-shadow:0 0 0 1px #E0E0DA,0 20px 60px rgba(15,59,54,.06);background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;display:flex;flex-direction:column}
 button{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-header{background:var(--surface);color:var(--ink);padding:calc(12px + env(safe-area-inset-top)) 18px 0;position:relative}
-.brand{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-.brand h1{font-family:var(--display);font-weight:600;font-size:31px;letter-spacing:.2px;line-height:1.05;margin:0;color:var(--brand)}
-.clock{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;text-align:right;line-height:1.3}
-.clock b{display:block;font-size:20px;color:var(--brand);font-weight:600}
-.status{margin-top:6px;font-size:15px;color:var(--muted)}
-.track{display:flex;gap:5px;margin:12px 0 14px;align-items:center}
-.track span{width:9px;height:9px;transform:rotate(45deg);border:1.2px solid #CDBB8E;flex:0 0 auto}
+header{background:var(--surface);color:var(--ink);padding:calc(8px + env(safe-area-inset-top)) 16px 0;position:relative}
+.brand{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.brand h1{font-family:var(--display);font-weight:600;font-size:19px;line-height:1.1;margin:0;color:var(--brand)}
+.clock{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;text-align:right;line-height:1.3}
+.clock b{display:block;font-size:16px;color:var(--brand);font-weight:600}
+.status{margin-top:1px;font-size:12.5px;color:var(--muted)}
+.track{display:flex;gap:4px;margin:7px 0 8px;align-items:center}
+.track span{width:6px;height:6px;transform:rotate(45deg);border:1.2px solid #CDBB8E;flex:0 0 auto}
 .track span.past{background:#CDBB8E}
-.track span.now{background:var(--gold);border-color:var(--gold);width:12px;height:12px}
+.track span.now{background:var(--gold);border-color:var(--gold);width:8px;height:8px}
 .track em{font-style:normal;font-size:12px;color:var(--muted);margin-left:6px}
-.hizam{height:12px;margin:0 -18px;opacity:.55;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='12' viewBox='0 0 28 12'%3E%3Cg fill='none' stroke='%23A6843E' stroke-width='.8'%3E%3Crect x='10' y='2' width='8' height='8' transform='rotate(45 14 6)'/%3E%3Cpath d='M0 6h8M20 6h8'/%3E%3C/g%3E%3C/svg%3E") repeat-x center;border-bottom:1px solid var(--line)}
+.hizam{height:8px;background-size:auto 8px!important;margin:0 -18px;opacity:.55;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='12' viewBox='0 0 28 12'%3E%3Cg fill='none' stroke='%23A6843E' stroke-width='.8'%3E%3Crect x='10' y='2' width='8' height='8' transform='rotate(45 14 6)'/%3E%3Cpath d='M0 6h8M20 6h8'/%3E%3C/g%3E%3C/svg%3E") repeat-x center;border-bottom:1px solid var(--line)}
 main{flex:1;overflow-y:auto;padding:18px 16px 28px;-webkit-overflow-scrolling:touch}
 .view{display:none;max-width:640px;margin:0 auto}
 .view.on{display:block}
@@ -120,7 +120,7 @@ body[data-city="Madinah"] .nextup .t{color:#9ED3B4}
 .card .what{margin-bottom:2px}
 .card .k{font-size:13px;color:var(--muted)}
 a{color:var(--accent)}
-nav{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--line);background:var(--surface);padding-bottom:env(safe-area-inset-bottom)}
+nav{display:grid;grid-template-columns:repeat(6,1fr);border-top:1px solid var(--line);background:var(--surface);padding-bottom:env(safe-area-inset-bottom)}
 nav button{border:0;background:transparent;padding:8px 0 9px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted);position:relative}
 nav button svg{width:22px;height:22px}
 nav button.on{color:var(--brand);font-weight:700}
@@ -222,14 +222,19 @@ table.t tr.win td{color:var(--ok);font-weight:700}
 .thumb{border:1px solid var(--line);border-radius:10px;padding:0;overflow:hidden;background:none;cursor:zoom-in;width:64px;height:64px}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .thumb.zoom{width:100%;height:auto;cursor:zoom-out}.thumb.zoom img{height:auto;object-fit:contain}
+.chkrow{display:flex;align-items:center;border-bottom:1px solid var(--line)}
+.chkrow .chk{border-bottom:0;flex:1}
+.addli{display:flex;gap:8px;padding:10px 14px;background:var(--field)}
+.addli input{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface);color:var(--ink);font:inherit;font-size:15px}
+.ref.rm{background:none;cursor:pointer;margin-left:4px}
+.addbox{margin-top:16px}.lblh{font-weight:700;color:var(--brand)}
 @media (max-width:360px){.stats{grid-template-columns:1fr 1fr}.grid4{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:no-preference){.tick,.pill,.chip{transition:background .15s,border-color .15s,color .15s}}
 </style>
 </head>
 <body>
 <header>
-  <div class="brand"><h1>Umrah Companion</h1><div class="clock" id="clock"></div></div>
-  <div class="status" id="status"></div>
+  <div class="brand"><div><h1>Umrah Companion</h1><div class="status" id="status"></div></div><div class="clock" id="clock"></div></div>
   <div class="track" id="track" aria-hidden="true"></div>
   <div class="hizam" aria-hidden="true"></div>
 </header>
@@ -237,7 +242,6 @@ table.t tr.win td{color:var(--ok);font-weight:700}
 <main id="main">
   <section class="view" id="v-today"></section>
   <section class="view" id="v-plan"><h2>Day by day</h2><div class="chips" id="dayChips"></div><div id="dayList"></div></section>
-  <section class="view" id="v-rounds"><h2>Round counter</h2><div id="counters"></div></section>
   <section class="view" id="v-lists"><h2>Checklists</h2>
     <div class="seg"><button id="segZ" class="on">Ziyarah</button><button id="segP">Packing</button></div>
     <div id="listProg"></div><div id="listBody"></div></section>
@@ -249,7 +253,6 @@ table.t tr.win td{color:var(--ok);font-weight:700}
 <nav id="nav">
   <button data-v="today" aria-label="Today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>Today</button>
   <button data-v="plan" aria-label="Plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Plan</button>
-  <button data-v="rounds" aria-label="Rounds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="8" height="8"/><circle cx="12" cy="12" r="10" stroke-dasharray="3 3"/></svg>Rounds</button>
   <button data-v="lists" aria-label="Lists"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 6h12M9 12h12M9 18h12M3 6l1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>Lists</button>
   <button data-v="money" aria-label="Budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="3"/></svg>Budget</button>
   <button data-v="tools" aria-label="Tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h13l-3-3M20 17H7l3 3"/></svg>Convert</button>
@@ -282,7 +285,7 @@ const DAYS=[
   ["07:30","Taxi to Al Shahba Hotel, check in","Umm Al Qura Rd, Ajyad area. Room is booked from 18 Nov and the hotel knows you arrive 07:00 to 08:00. Ask for twin beds and the walking route to the Haram.","Agoda"],
   ["08:00","Sleep and eat, still in ihram","Wake by 11:45.",""],
   ["12:07","Dhuhr at the Haram","Walk from the hotel, about 15 minutes. Leave by 11:50.",""],
-  ["12:25","Perform Umrah","Tawaf 7 rounds, 2 rak'ah behind Maqam Ibrahim, Zamzam, Sa'i 7, then shave or trim. Use the Rounds tab to count. If Asr (about 15:12) starts, pause, pray, continue.","Nusuk 14:01",1],
+  ["12:25","Perform Umrah","Tawaf 7 rounds, 2 rak'ah behind Maqam Ibrahim, Zamzam, Sa'i 7, then shave or trim. If Asr (about 15:12) starts, pause, pray, continue.","Nusuk 14:01",1],
   ["Evening","Optional: thobe and SIM at the Clock Tower","STC and Mobily shops on floor P3 of Abraj Al Bait.",""]]},
  {id:"d3",date:"2026-11-20",label:"Fri 20",title:"Day 3 · Jumu'ah",city:"Makkah",items:[
   ["05:20","Fajr at the Haram","",""],
@@ -407,7 +410,7 @@ const INFO=[
 let S={done:{},act:{},ex:[],tawaf:0,sai:0,list:"z",
   rates:{SAR:4.192,BDT:137.48,t:"15 Nov 2026 (saved)"},gold:{usd:3866.51,t:"12 Nov 2026 (saved)"},
   conv:{amt:"100",cur:"SAR"},cmpEur:"200",cmp:["","",""],exEur:"200",exRate:"",exWhere:"Makkah",gw:"50",gk:22,
-  extra:[],newCat:"Food",newV:"",newC:"SAR",newN:"",newD:"",exFee:"",exFeeC:"SAR",exFinal:"",open:{},
+  extra:[],myPlan:{},myList:{},newCat:"Food",newV:"",newC:"SAR",newN:"",newD:"",exFee:"",exFeeC:"SAR",exFinal:"",open:{},
   shops:[
    {name:"Germany dealer",cur:"EUR",price:"",mk:"",mkT:"%",vat:"0",vatOn:"all",prem:3,note:"Bars and coins: no VAT. For jewellery set VAT 19% and add making."},
    {name:"Bangladesh (BAJUS)",cur:"BDT",price:"",mk:"",mkT:"%",vat:"0",vatOn:"all",note:"BAJUS price already includes 5% VAT."},
@@ -418,6 +421,7 @@ const BAJUS={22:19220,21:18355,18:15765};
 function load(){try{const t=localStorage.getItem("umrah-companion");if(t)S=Object.assign(S,JSON.parse(t));}catch(e){}
   /* Items marked "Done" in the plan start ticked (once). */
   ["extra","shops","ex"].forEach(k=>{if(!Array.isArray(S[k]))delete S[k];});
+  ["myPlan","myList"].forEach(k=>{if(!S[k]||typeof S[k]!=="object")S[k]={};});
   if(!S.seeded){DAYS.forEach(d=>d.items.forEach((it,j)=>{if(it[0]==="Done")S.done[d.id+"-"+j]=true;}));S.seeded=1;}}
 function save(){try{localStorage.setItem("umrah-companion",JSON.stringify(S));return true;}catch(e){return false;}}
 
@@ -432,11 +436,11 @@ function riyadhNow(){
 function todayIndex(){const d=riyadhNow().date;return DAYS.findIndex(x=>x.date===d);}
 function fmtEUR(v){return "€"+v.toLocaleString("en-GB",{minimumFractionDigits:0,maximumFractionDigits:0});}
 
-function itemHTML(key,time,what,det,ref,isKey,next){
+function itemHTML(key,time,what,det,ref,isKey,next,mine){
   const done=S.done[key];
   return `<div class="item${isKey?" key":""}${done?" done":""}${next?" next":""}">
     <div class="time">${esc(time)}</div>
-    <div><div class="what">${esc(what)}</div>${det?`<div class="det">${esc(det)}</div>`:""}${ref?`<span class="ref">${esc(ref)}</span>`:""}</div>
+    <div><div class="what">${esc(what)}</div>${det?`<div class="det">${esc(det)}</div>`:""}${ref?`<span class="ref">${esc(ref)}</span>`:""}${mine?`<button class="ref rm" data-pdel="${mine}">Added by you · remove</button>`:""}</div>
     <button class="tick" data-k="${key}" aria-label="Mark done">${CHECK}</button></div>`;
 }
 function simpleHTML(key,what,det){
@@ -444,19 +448,28 @@ function simpleHTML(key,what,det){
   return `<div class="item simple${done?" done":""}"><div><div class="what">${esc(what)}</div>${det?`<div class="det">${esc(det)}</div>`:""}</div>
     <button class="tick" data-k="${key}" aria-label="Mark done">${CHECK}</button></div>`;
 }
+/* all items of a day: built-in ones plus the ones you added, in time order */
+function dayItems(i){
+  const d=DAYS[i];
+  const base=d.items.map((it,j)=>({it,key:d.id+"-"+j}));
+  const mine=(S.myPlan[d.id]||[]).map(x=>({it:[x.t||"",x.w,x.n||"","",0],key:d.id+"-c"+x.id,mine:x.id}));
+  const all=base.concat(mine);
+  const tm=x=>/^\d\d:\d\d/.test(x.it[0])?x.it[0]:null;
+  /* place each added item before the first built-in item with a later time */
+  const out=base.slice();
+  mine.forEach(m=>{const t=tm(m);let at=out.length;if(t){const k=out.findIndex(o=>tm(o)&&tm(o)>t);if(k>=0)at=k;}out.splice(at,0,m);});
+  return out;
+}
 function dayList(i,highlightNext){
-  const d=DAYS[i];let nextIdx=-1;
-  if(highlightNext){
-    const hm=riyadhNow().hm;
-    nextIdx=d.items.findIndex((it,j)=>!S.done[d.id+"-"+j]&&(!/^\d\d:\d\d/.test(it[0])||it[0]>=hm));
-  }
-  return `<div class="list">${d.items.map((it,j)=>itemHTML(d.id+"-"+j,it[0],it[1],it[2],it[3],it[4],j===nextIdx)).join("")}</div>`;
+  const d=DAYS[i];
+  const its=dayItems(i);const nx=highlightNext?nextKey(i,true):null,nk=nx&&nx.key;
+  return `<div class="list">${its.map(x=>itemHTML(x.key,x.it[0],x.it[1],x.it[2],x.it[3],x.it[4],x.key===nk,x.mine?d.id+":"+x.mine:null)).join("")}</div>`;
 }
 
 /* ---------- Header ---------- */
 function renderHeader(){
   const n=riyadhNow(),ti=todayIndex();
-  $("#clock").innerHTML=`Saudi time<br><b>${n.hm}</b>`;
+  $("#clock").innerHTML=`<b>${n.hm}</b>Saudi time`;
   let st;
   if(ti>0){st=`${DAYS[ti].title.split(" · ")[0]} of 13`;}
   else if(n.date<"2026-11-18"){const ms=new Date("2026-11-18T00:00:00+03:00")-new Date();const dd=Math.ceil(ms/86400000);st=`${dd} day${dd===1?"":"s"} until you fly`;}
@@ -468,15 +481,16 @@ function renderHeader(){
 
 /* ---------- Views ---------- */
 let planDay=null;
-function nextIndex(d,live){
+function nextKey(i,live){
   const hm=riyadhNow().hm;
-  return d.items.findIndex((it,j)=>!S.done[d.id+"-"+j]&&(!live||!/^\d\d:\d\d/.test(it[0])||it[0]>=hm));
+  const x=dayItems(i).find(x=>!S.done[x.key]&&(!live||!/^\d\d:\d\d/.test(x.it[0])||x.it[0]>=hm));
+  return x?x:null;
 }
 function renderToday(){
   const ti=todayIndex();const i=ti>0?ti:0;const d=DAYS[i];
-  const total=d.items.length,doneN=d.items.filter((_,j)=>S.done[d.id+"-"+j]).length;
-  const n=nextIndex(d,ti>0);let html=`<h2>${esc(d.title.split(" · ").pop())}</h2><div class="bar"><i style="width:${total?Math.round(doneN/total*100):0}%"></i></div>`;
-  if(n>=0){const it=d.items[n];html+=`<div class="nextup"><div class="lbl">${doneN?"Next":"Start with"}</div><div class="t">${esc(it[0])}</div><div class="w">${esc(it[1])}</div>${it[2]?`<div class="d">${esc(it[2])}</div>`:""}<button class="tick" data-k="${d.id}-${n}" aria-label="Mark done">${CHECK}</button></div>`;}
+  const its=dayItems(i),total=its.length,doneN=its.filter(x=>S.done[x.key]).length;
+  const nx=nextKey(i,ti>0);let html=`<h2>${esc(d.title.split(" · ").pop())}</h2><div class="bar"><i style="width:${total?Math.round(doneN/total*100):0}%"></i></div>`;
+  if(nx){const it=nx.it;html+=`<div class="nextup"><div class="lbl">${doneN?"Next":"Start with"}</div><div class="t">${esc(it[0])}</div><div class="w">${esc(it[1])}</div>${it[2]?`<div class="d">${esc(it[2])}</div>`:""}<button class="tick" data-k="${nx.key}" aria-label="Mark done">${CHECK}</button></div>`;}
   else html+=`<div class="nextup"><div class="lbl">All done</div><div class="w">Everything for today is ticked off.</div></div>`;
   html+=`<div class="progress">${doneN} of ${total} done today</div>${dayList(i,false)}`;
   if(ti<=0&&riyadhNow().date<"2026-11-18"){html+=`<h3>First travel day</h3>${dayList(1,false)}`;}
@@ -487,16 +501,22 @@ function renderPlan(){
   if(planDay===null){const ti=todayIndex();planDay=ti>0?ti:0;}
   const ti=todayIndex();
   $("#dayChips").innerHTML=DAYS.map((d,i)=>`<button class="chip${i===planDay?" on":""}${i===ti?" today":""}" data-day="${i}">${esc(d.label)}</button>`).join("");
-  $("#dayList").innerHTML=`<h3 style="margin-top:4px">${esc(DAYS[planDay].title)}</h3>`+dayList(planDay,planDay===ti);
+  $("#dayList").innerHTML=`<h3 style="margin-top:4px">${esc(DAYS[planDay].title)}</h3>`+dayList(planDay,planDay===ti)+
+  `<div class="box addbox"><div class="lblh">Add to ${esc(DAYS[planDay].label)}</div>
+    <div class="field"><input type="time" id="pT" style="width:auto"><input id="pW" class="wide" placeholder="What, e.g. Visit Al Balad"></div>
+    <div class="field"><input id="pN" class="wide" placeholder="Details (optional)"><button class="pill solid" data-padd="1">Add</button></div></div>`;
 }
 function renderLists(){
   const isZ=S.list==="z";$("#segZ").classList.toggle("on",isZ);$("#segP").classList.toggle("on",!isZ);
   const groups=isZ?ZIY:PACK;let all=0,dn=0,html="";
   groups.forEach((g,gi)=>{
-    let gd=0;const rows=g[1].map((it,j)=>{const k=(isZ?"z":"p")+gi+"-"+j;all++;const d=!!S.done[k];if(d){dn++;gd++;}
-      return `<button class="chk${d?" done":""}" data-k="${k}" aria-pressed="${d}"><span class="box2">${CHECK}</span><span class="txt"><b>${esc(it[0])}</b>${it[1]?`<small>${esc(it[1])}</small>`:""}</span></button>`;}).join("");
+    const gid=(isZ?"z":"p")+gi;
+    const items=g[1].map((it,j)=>({it,k:gid+"-"+j})).concat((S.myList[gid]||[]).map(x=>({it:[x.w,x.n||""],k:gid+"-c"+x.id,mine:x.id})));
+    let gd=0;const rows=items.map(({it,k,mine})=>{all++;const d=!!S.done[k];if(d){dn++;gd++;}
+      return `<div class="chkrow"><button class="chk${d?" done":""}" data-k="${k}" aria-pressed="${d}"><span class="box2">${CHECK}</span><span class="txt"><b>${esc(it[0])}</b>${it[1]?`<small>${esc(it[1])}</small>`:""}</span></button>${mine?`<button class="x" data-ldel="${gid}:${mine}" aria-label="Remove ${esc(it[0])}">×</button>`:""}</div>`;}).join("")+
+      `<div class="addli"><input placeholder="Add an item" data-lnew="${gid}" aria-label="Add an item to ${esc(g[0])}"><button class="pill sm solid" data-ladd="${gid}">Add</button></div>`;
     const open=S.open[(isZ?"z":"p")+gi]!==false;
-    html+=`<details class="grp" ${open?"open":""} data-g="${isZ?"z":"p"}${gi}"><summary><span>${esc(g[0])}</span><span class="cnt${gd===g[1].length?" full":""}">${gd}/${g[1].length}</span></summary><div class="grpb">${rows}</div></details>`;
+    html+=`<details class="grp" ${open?"open":""} data-g="${isZ?"z":"p"}${gi}"><summary><span>${esc(g[0])}</span><span class="cnt${gd===items.length?" full":""}">${gd}/${items.length}</span></summary><div class="grpb">${rows}</div></details>`;
   });
   $("#listProg").innerHTML=`<div class="bar"><i style="width:${all?Math.round(dn/all*100):0}%"></i></div><div class="progress">${dn} of ${all} ${isZ?"places visited":"items packed"}</div>`;
   $("#listBody").innerHTML=html;
@@ -658,25 +678,8 @@ function renderInfo(){
   `<div class="card"><div class="what">Full plan and sources</div><div class="det">Your Google Sheet has every detail and source link, and works offline in the Google Sheets app.</div><a href="${SHEET}">Open Umrah Plan sheet</a></div>
    <div class="hint">Booking numbers, visa number and PNR are left out of this app on purpose; they are in your Google Sheet. Ticks, amounts and exchanges are saved on this phone only. Rates update when you are online and are kept for offline use.</div>`;
 }
-function counterHTML(id,name,n,hint){
-  const dirs=["Start at Safa","Safa → Marwa","Marwa → Safa"];
-  let dir="";
-  if(id==="sai"){dir=n>=7?"Finished at Marwa":n===0?"Start at Safa, walk to Marwa":(n%2===0?"Round "+(n+1)+": Safa → Marwa":"Round "+(n+1)+": Marwa → Safa");}
-  else dir=n>=7?"Tawaf complete. Pray 2 rak'ah behind Maqam Ibrahim.":"Round "+(n+1)+": start at the Black Stone line";
-  return `<div class="counter"><div class="top"><div class="name">${name}</div><div class="of">${n} / 7</div></div>
-    <div class="dir">${esc(dir)}</div>
-    <div class="rounds">${[1,2,3,4,5,6,7].map(r=>`<i class="${r<=n?"done":""}"><b>${r}</b></i>`).join("")}</div>
-    <button class="big" data-inc="${id}" ${n>=7?"disabled":""}>${n>=7?"Done":"Round "+(n+1)+" finished"}</button>
-    <div class="row"><button class="ghost" data-undo="${id}">Undo last</button><button class="ghost" data-reset="${id}">Reset</button></div>
-    <div class="hint">${esc(hint)}</div></div>`;
-}
-function renderRounds(){
-  $("#counters").innerHTML=counterHTML("tawaf","Tawaf",S.tawaf,"Keep the Kaaba on your left. Each round starts and ends at the Black Stone corner, marked by a green light.")+
-    counterHTML("sai","Sa'i",S.sai,"Safa to Marwa counts as one, Marwa back to Safa as two. Men walk faster between the green lights.");
-}
-
 /* ---------- Navigation and events ---------- */
-const VIEWS=["today","plan","rounds","lists","money","tools","info"];
+const VIEWS=["today","plan","lists","money","tools","info"];
 let current="today";
 function show(v){
   if(!VIEWS.includes(v))v="today";current=v;
@@ -687,16 +690,19 @@ function show(v){
 }
 function renderAll(){
   renderHeader();
-  ({today:renderToday,plan:renderPlan,rounds:renderRounds,lists:renderLists,money:renderMoney,tools:renderTools,info:renderInfo})[current]();
+  ({today:renderToday,plan:renderPlan,lists:renderLists,money:renderMoney,tools:renderTools,info:renderInfo})[current]();
 }
 document.addEventListener("click",e=>{
   const t=e.target.closest("button");if(!t)return;const d=t.dataset;
   if(d.v){show(d.v);return;}
   if(d.k&&!d.sh){S.done[d.k]=!S.done[d.k];save();renderAll();return;}
   if(d.day){planDay=+d.day;renderPlan();return;}
-  if(d.inc){S[d.inc]=Math.min(7,S[d.inc]+1);save();renderRounds();if(navigator.vibrate)try{navigator.vibrate(30)}catch(_){};return;}
-  if(d.undo){S[d.undo]=Math.max(0,S[d.undo]-1);save();renderRounds();return;}
-  if(d.reset){S[d.reset]=0;save();renderRounds();return;}
+  if(d.padd){const w=$("#pW").value.trim();if(!w){$("#pW").focus();return;}const id=DAYS[planDay].id;
+    (S.myPlan[id]=S.myPlan[id]||[]).push({id:Date.now().toString(36),t:$("#pT").value,w,n:$("#pN").value.trim()});save();renderPlan();return;}
+  if(d.pdel){const [id,x]=d.pdel.split(":");S.myPlan[id]=(S.myPlan[id]||[]).filter(o=>o.id!==x);save();renderAll();return;}
+  if(d.ladd){const inp=document.querySelector(`[data-lnew="${d.ladd}"]`);const w=inp.value.trim();if(!w){inp.focus();return;}
+    (S.myList[d.ladd]=S.myList[d.ladd]||[]).push({id:Date.now().toString(36),w});save();renderLists();return;}
+  if(d.ldel){const [g,x]=d.ldel.split(":");S.myList[g]=(S.myList[g]||[]).filter(o=>o.id!==x);save();renderLists();return;}
   if(d.cur){const b=BUDGET.find(x=>x[0]===d.cur);S.act[d.cur]=Object.assign({},getAct(b),{c:d.c});save();renderMoney();return;}
   if(d.newcat){S.newCat=d.newcat;save();renderMoney();return;}
   if(d.newc){S.newC=d.c;save();renderMoney();return;}
@@ -725,6 +731,9 @@ document.addEventListener("click",e=>{
   if(t.id==="segZ"){S.list="z";save();renderLists();return;}
   if(t.id==="segP"){S.list="p";save();renderLists();return;}
 });
+document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;const d=e.target.dataset||{};
+  if(d.lnew){e.preventDefault();const b=document.querySelector(`[data-ladd="${d.lnew}"]`);b&&b.click();}
+  else if(e.target.id==="pW"||e.target.id==="pN"){e.preventDefault();const b=document.querySelector("[data-padd]");b&&b.click();}});
 document.addEventListener("toggle",e=>{const g=e.target.dataset&&e.target.dataset.g;if(g){S.open[g]=e.target.open;save();}},true);
 document.addEventListener("change",e=>{
   const d=e.target.dataset||{};const v=e.target.value.trim();
