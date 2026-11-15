@@ -255,6 +255,21 @@ table.t tr.win td{color:var(--ok);font-weight:700}
 .fsum div{background:var(--cs,#fff);padding:9px 11px}.fsum span{display:block;font-size:11.5px;color:var(--muted)}.fsum b{font-size:16px;font-variant-numeric:tabular-nums}
 .links a{display:block;padding:10px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--brand);font-weight:600}
 .links a:last-child{border-bottom:0}.links a small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.upl2{display:block;text-align:center;margin-top:10px;font-size:15px;cursor:pointer}
+.docrow{display:flex;align-items:center;border-bottom:1px solid var(--line)}.docrow:last-child{border-bottom:0}
+.dopen{flex:1;display:flex;gap:10px;align-items:center;text-align:left;border:0;background:none;padding:10px 0;cursor:pointer;color:var(--brand);font-weight:600}
+.dopen small{display:block;color:var(--muted);font-weight:400;font-size:12px}
+.dic{flex:0 0 36px;height:36px;border-radius:8px;display:grid;place-items:center;font-size:10px;font-weight:800;background:var(--cs,#eee);color:var(--c,#333)}
+#viewer{position:fixed;inset:0;z-index:50;background:#111;display:flex;flex-direction:column}
+#viewer[hidden]{display:none}
+.vbar{display:flex;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 12px 10px;background:#0F3B36;color:#fff}
+.vbar b{flex:1;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vbar button{border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;border-radius:999px;padding:6px 12px;font-weight:700;cursor:pointer}
+#vclose{font-size:20px;line-height:1;padding:4px 12px}
+#vbody{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;align-items:center}
+#vbody img{max-width:100%;height:auto}
+#vbody iframe{width:100%;flex:1;border:0;background:#fff;min-height:70vh}
+.vopen{margin:10px auto calc(12px + env(safe-area-inset-bottom));text-decoration:none}
 @media (max-width:360px){.stats{grid-template-columns:1fr 1fr}.grid4{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:no-preference){.tick,.pill,.chip{transition:background .15s,border-color .15s,color .15s}}
 </style>
@@ -282,7 +297,8 @@ table.t tr.win td{color:var(--ok);font-weight:700}
     <div id="listProg"></div><div id="listBody"></div></section>
   <section class="view" id="v-money"><h2>Budget</h2><div id="moneyBody"></div></section>
   <section class="view" id="v-tools"><h2>Money tools</h2><div id="toolsBody"></div></section>
-  <section class="view" id="v-info"><h2>Bookings and contacts</h2><div id="infoBody"></div></section>
+  <section class="view" id="v-info"><h2>Documents</h2><div id="docsBody"></div><h2 style="margin-top:22px">Bookings and contacts</h2><div id="infoBody"></div></section>
+  <div id="viewer" hidden><div class="vbar"><b id="vname"></b><button id="vshare">Share</button><button id="vclose" aria-label="Close">×</button></div><div id="vbody"></div></div>
 </main>
 
 
@@ -767,7 +783,42 @@ const LINKS=[
  ["Flight home",[["Royal Jordanian: Zamzam and what not to carry","https://www.rj.com/en/info-and-tips/baggage-information/what-not-to-carry"]]],
  ["Videos",[["Umrah step by step","https://www.youtube.com/watch?v=W-yRSRvKgNQ"],["Madinah visit","https://www.youtube.com/watch?v=a35qhZYbp60"]]]
 ];
+/* ---------- Offline documents: kept in this phone's storage only ---------- */
+const DOC_CATS=["Flight","Hotel","Train","Visa","Permit","Other"];
+let docCat="Flight",DOCS=[];
+function idb(){return new Promise((ok,no)=>{const r=indexedDB.open("umrah-docs",1);r.onupgradeneeded=()=>r.result.createObjectStore("files",{keyPath:"id"});r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error);});}
+async function docTx(mode,fn){const db=await idb();return new Promise((ok,no)=>{const t=db.transaction("files",mode),st=t.objectStore("files");const res=fn(st);t.oncomplete=()=>ok(res&&res.result);t.onerror=()=>no(t.error);});}
+async function loadDocs(){try{DOCS=(await docTx("readonly",st=>st.getAll()))||[];}catch(e){DOCS=[];}DOCS.sort((a,b)=>DOC_CATS.indexOf(a.cat)-DOC_CATS.indexOf(b.cat)||a.added-b.added);renderDocs();}
+async function addDocs(files){
+  for(const f of files){const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    try{await docTx("readwrite",st=>st.put({id,name:f.name.replace(/\.[^.]+$/,""),type:f.type,size:f.size,cat:docCat,added:Date.now(),blob:f}));}
+    catch(e){alert("Could not save "+f.name+". The phone storage may be full.");}}
+  if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
+  loadDocs();
+}
+const kb=n=>n>1048576?(n/1048576).toFixed(1)+" MB":Math.max(1,Math.round(n/1024))+" KB";
+function renderDocs(){
+  const el=$("#docsBody");if(!el)return;
+  const by=DOC_CATS.map(c=>[c,DOCS.filter(d=>d.cat===c)]).filter(x=>x[1].length);
+  el.innerHTML=`<div class="box">
+    <div class="hint" style="margin:0 0 8px">Save tickets, bookings, visa and permits here once. They stay only on this phone and open without internet.</div>
+    <div class="pills">${DOC_CATS.map(c=>`<button class="pill sm${docCat===c?" on":""}" data-dcat="${c}">${c}</button>`).join("")}</div>
+    <label class="big upl2">Add ${docCat.toLowerCase()} file<input type="file" accept="application/pdf,image/*" multiple data-dadd="1" hidden></label></div>`+
+  (by.length?by.map(([c,ds])=>blk("doc"+c,c,ds.length+(ds.length===1?" file":" files"),`<div class="links">${ds.map(d=>`<div class="docrow"><button class="dopen" data-dopen="${d.id}"><span class="dic">${/pdf/.test(d.type)?"PDF":"IMG"}</span><span>${esc(d.name)}<small>${kb(d.size)}</small></span></button><button class="x" data-ddel="${d.id}" aria-label="Delete ${esc(d.name)}">×</button></div>`).join("")}</div>`,{Flight:"flights",Hotel:"hotels",Train:"transport",Visa:"money",Permit:"food",Other:"other"}[c])).join(""):`<div class="hint">No files yet. Pick a type above, then tap Add.</div>`);
+}
+let vURL=null,vDoc=null;
+function openDoc(id){
+  const d=DOCS.find(x=>x.id===id);if(!d)return;vDoc=d;
+  if(vURL)URL.revokeObjectURL(vURL);vURL=URL.createObjectURL(d.blob);
+  $("#vname").textContent=d.name;
+  $("#vbody").innerHTML=/pdf/.test(d.type)?`<iframe src="${vURL}" title="${esc(d.name)}"></iframe><a class="pill solid vopen" href="${vURL}" target="_blank" rel="noopener">Open full PDF</a>`:`<img src="${vURL}" alt="${esc(d.name)}">`;
+  $("#viewer").hidden=false;
+}
+function closeDoc(){$("#viewer").hidden=true;$("#vbody").innerHTML="";}
+async function shareDoc(){if(!vDoc)return;const f=new File([vDoc.blob],vDoc.name+(/pdf/.test(vDoc.type)?".pdf":".jpg"),{type:vDoc.type});
+  if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:vDoc.name});}catch(e){}}else window.open(vURL,"_blank");}
 function renderInfo(){
+  loadDocs();
   $("#infoBody").innerHTML=INFO.map(x=>`<div class="card"><h3 style="margin:0 0 4px">${esc(x[0])}</h3><div class="what">${esc(x[1])}</div><div class="det">${esc(x[2])}</div></div>`).join("")+
   `<div class="card"><div class="what">Full plan and sources</div><div class="det">Your Google Sheet has every detail and source link, and works offline in the Google Sheets app.</div><a href="${SHEET}">Open Umrah Plan sheet</a></div>
    <h3>Links and sources</h3>${LINKS.map(([g,ls],i)=>blk("ln"+i,esc(g),ls.length+(ls.length===1?" link":" links"),`<div class="links">${ls.map(([t,u])=>`<a href="${u}" target="_blank" rel="noopener">${esc(t)}<small>${esc(new URL(u).hostname.replace("www.",""))}</small></a>`).join("")}</div>`,["money","flights","shop","transport","hotels","food"][i])).join("")}
@@ -823,6 +874,11 @@ document.addEventListener("click",e=>{
   if(d.shdel){S.shops.splice(+d.shdel,1);save();renderTools();return;}
   if(d.shadd){S.shops.push({name:"Saudi shop "+(S.shops.filter(x=>x.cur==="SAR").length+1),cur:"SAR",price:"",mk:"",mkT:"g",vat:"15",vatOn:"making"});save();renderTools();return;}
   if(d.refresh){refreshRates(true);return;}
+  if(d.dcat){docCat=d.dcat;renderDocs();return;}
+  if(d.dopen){openDoc(d.dopen);return;}
+  if(d.ddel){const doc=DOCS.find(x=>x.id===d.ddel);if(doc&&confirm("Delete "+doc.name+" from this phone?")){docTx("readwrite",st=>st.delete(d.ddel)).then(loadDocs);}return;}
+  if(t.id==="vclose"){closeDoc();return;}
+  if(t.id==="vshare"){shareDoc();return;}
   if(t.id==="segZ"){S.list="z";save();renderLists();return;}
   if(t.id==="segP"){S.list="p";save();renderLists();return;}
 });
@@ -838,6 +894,7 @@ document.addEventListener("change",e=>{
   if(["exRate","exFee","exFinal","exEur"].includes(d.f)){S[d.f]=v.replace(",",".");save();renderMoney();return;}
   if(["newV","newN","newD"].includes(d.f)){S[d.f]=v;save();return;}
   if(d.shimg!==undefined&&e.target.files&&e.target.files[0]){addPhoto(+d.shimg,e.target.files[0]);return;}
+  if(d.dadd&&e.target.files&&e.target.files.length){addDocs([...e.target.files]);e.target.value="";return;}
   if(d.f==="gw"){S.gw=v;save();renderTools();return;}
 });
 /* live update of the quick converter while typing */
