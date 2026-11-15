@@ -263,13 +263,13 @@ table.t tr.win td{color:var(--ok);font-weight:700}
 #viewer{position:fixed;inset:0;z-index:50;background:#111;display:flex;flex-direction:column}
 #viewer[hidden]{display:none}
 .vbar{display:flex;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 12px 10px;background:#0F3B36;color:#fff}
-.vbar b{flex:1;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vbar b{flex:1;min-width:0;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .vbar button{border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;border-radius:999px;padding:6px 12px;font-weight:700;cursor:pointer}
-#vclose{font-size:20px;line-height:1;padding:4px 12px}
-#vbody{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;align-items:center}
-#vbody img{max-width:100%;height:auto}
-#vbody iframe{width:100%;flex:1;border:0;background:#fff;min-height:70vh}
-.vopen{margin:10px auto calc(12px + env(safe-area-inset-bottom));text-decoration:none}
+.vbar .vback{background:#E6D3A3;color:#0F3B36;border-color:#E6D3A3}
+#vzi,#vzo{width:34px;padding:6px 0;font-size:17px;line-height:1}
+#vbody{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:10px 8px calc(20px + env(safe-area-inset-bottom))}
+#vbody .pages{width:100%;margin:0 auto}
+#vbody canvas,#vbody .pages img{display:block;width:100%;height:auto;margin:0 auto 10px;background:#fff;border-radius:4px;box-shadow:0 2px 10px rgba(0,0,0,.4)}
 @media (max-width:360px){.stats{grid-template-columns:1fr 1fr}.grid4{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:no-preference){.tick,.pill,.chip{transition:background .15s,border-color .15s,color .15s}}
 </style>
@@ -298,7 +298,7 @@ table.t tr.win td{color:var(--ok);font-weight:700}
   <section class="view" id="v-money"><h2>Budget</h2><div id="moneyBody"></div></section>
   <section class="view" id="v-tools"><h2>Money tools</h2><div id="toolsBody"></div></section>
   <section class="view" id="v-info"><h2>Documents</h2><div id="docsBody"></div><h2 style="margin-top:22px">Bookings and contacts</h2><div id="infoBody"></div></section>
-  <div id="viewer" hidden><div class="vbar"><b id="vname"></b><button id="vshare">Share</button><button id="vclose" aria-label="Close">×</button></div><div id="vbody"></div></div>
+  <div id="viewer" hidden><div class="vbar"><button id="vclose" class="vback" aria-label="Close">‹ Close</button><b id="vname"></b><button id="vzo" aria-label="Zoom out">−</button><button id="vzi" aria-label="Zoom in">+</button><button id="vshare">Share</button></div><div id="vbody"></div></div>
 </main>
 
 
@@ -806,17 +806,34 @@ function renderDocs(){
     <label class="big upl2">Add ${docCat.toLowerCase()} file<input type="file" accept="application/pdf,image/*" multiple data-dadd="1" hidden></label></div>`+
   (by.length?by.map(([c,ds])=>blk("doc"+c,c,ds.length+(ds.length===1?" file":" files"),`<div class="links">${ds.map(d=>`<div class="docrow"><button class="dopen" data-dopen="${d.id}"><span class="dic">${/pdf/.test(d.type)?"PDF":"IMG"}</span><span>${esc(d.name)}<small>${kb(d.size)}</small></span></button><button class="x" data-ddel="${d.id}" aria-label="Delete ${esc(d.name)}">×</button></div>`).join("")}</div>`,{Flight:"flights",Hotel:"hotels",Train:"transport",Visa:"money",Permit:"food",Other:"other"}[c])).join(""):`<div class="hint">No files yet. Pick a type above, then tap Add.</div>`);
 }
-let vURL=null,vDoc=null;
-function openDoc(id){
-  const d=DOCS.find(x=>x.id===id);if(!d)return;vDoc=d;
+let vURL=null,vDoc=null,vZoom=1,pdfLib=null;
+async function getPdf(){if(!pdfLib){pdfLib=await import("./lib/pdf.min.mjs");pdfLib.GlobalWorkerOptions.workerSrc="./lib/pdf.worker.min.mjs";}return pdfLib;}
+function setZoom(z){vZoom=Math.min(3,Math.max(1,z));const b=$("#vbody .pages");if(b)b.style.width=(vZoom*100)+"%";}
+async function openDoc(id){
+  const d=DOCS.find(x=>x.id===id);if(!d)return;vDoc=d;vZoom=1;
   if(vURL)URL.revokeObjectURL(vURL);vURL=URL.createObjectURL(d.blob);
-  $("#vname").textContent=d.name;
-  $("#vbody").innerHTML=/pdf/.test(d.type)?`<iframe src="${vURL}" title="${esc(d.name)}"></iframe><a class="pill solid vopen" href="${vURL}" target="_blank" rel="noopener">Open full PDF</a>`:`<img src="${vURL}" alt="${esc(d.name)}">`;
-  $("#viewer").hidden=false;
+  $("#vname").textContent=d.name;$("#viewer").hidden=false;
+  history.pushState({viewer:1},"");
+  const body=$("#vbody");
+  if(!/pdf/.test(d.type)){body.innerHTML=`<div class="pages"><img src="${vURL}" alt="${esc(d.name)}"></div>`;return;}
+  body.innerHTML=`<div class="pages"><div class="hint" style="color:#ccc;text-align:center;padding:30px">Opening…</div></div>`;
+  try{
+    const lib=await getPdf();const pdf=await lib.getDocument({data:new Uint8Array(await d.blob.arrayBuffer())}).promise;
+    const wrap=body.querySelector(".pages");wrap.innerHTML="";
+    const W=Math.min(body.clientWidth,900)*Math.min(3,(window.devicePixelRatio||2))*1.5;
+    for(let n=1;n<=pdf.numPages;n++){
+      const pg=await pdf.getPage(n),v0=pg.getViewport({scale:1}),vp=pg.getViewport({scale:Math.min(4,W/v0.width)});
+      const c=document.createElement("canvas");c.width=vp.width;c.height=vp.height;c.setAttribute("aria-label","Page "+n);
+      wrap.appendChild(c);await pg.render({canvasContext:c.getContext("2d"),viewport:vp}).promise;
+      if($("#viewer").hidden)return;
+    }
+  }catch(e){body.innerHTML=`<div class="hint" style="color:#ddd;padding:24px">This PDF could not be shown here. Tap Share to open it in Files or Books.</div>`;}
 }
-function closeDoc(){$("#viewer").hidden=true;$("#vbody").innerHTML="";}
+function closeDoc(fromPop){if($("#viewer").hidden)return;$("#viewer").hidden=true;$("#vbody").innerHTML="";if(!fromPop&&history.state&&history.state.viewer)history.back();}
+addEventListener("popstate",()=>closeDoc(true));
+addEventListener("keydown",e=>{if(e.key==="Escape")closeDoc();});
 async function shareDoc(){if(!vDoc)return;const f=new File([vDoc.blob],vDoc.name+(/pdf/.test(vDoc.type)?".pdf":".jpg"),{type:vDoc.type});
-  if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:vDoc.name});}catch(e){}}else window.open(vURL,"_blank");}
+  if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:vDoc.name});}catch(e){}}else{const a=document.createElement("a");a.href=vURL;a.download=f.name;a.click();}}
 function renderInfo(){
   loadDocs();
   $("#infoBody").innerHTML=INFO.map(x=>`<div class="card"><h3 style="margin:0 0 4px">${esc(x[0])}</h3><div class="what">${esc(x[1])}</div><div class="det">${esc(x[2])}</div></div>`).join("")+
@@ -879,6 +896,8 @@ document.addEventListener("click",e=>{
   if(d.ddel){const doc=DOCS.find(x=>x.id===d.ddel);if(doc&&confirm("Delete "+doc.name+" from this phone?")){docTx("readwrite",st=>st.delete(d.ddel)).then(loadDocs);}return;}
   if(t.id==="vclose"){closeDoc();return;}
   if(t.id==="vshare"){shareDoc();return;}
+  if(t.id==="vzi"){setZoom(vZoom+0.5);return;}
+  if(t.id==="vzo"){setZoom(vZoom-0.5);return;}
   if(t.id==="segZ"){S.list="z";save();renderLists();return;}
   if(t.id==="segP"){S.list="p";save();renderLists();return;}
 });

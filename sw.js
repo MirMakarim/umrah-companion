@@ -1,5 +1,5 @@
-const CACHE="umrah-v16";
-const FILES=["./","./index.html","./manifest.json","./icon-180.png","./icon-192.png","./icon-512.png"];
+const CACHE="umrah-v17";
+const FILES=["./","./index.html","./manifest.json","./icon-180.png","./icon-192.png","./icon-512.png","./lib/pdf.min.mjs","./lib/pdf.worker.min.mjs"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()));});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE).map(x=>caches.delete(x)))).then(()=>self.clients.claim()));});
 self.addEventListener("fetch",e=>{
