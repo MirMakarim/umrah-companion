@@ -112,10 +112,30 @@ h3{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute
 .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px}
 .card .what{margin-bottom:2px}
 a{color:var(--gold)}
-nav{display:grid;grid-template-columns:repeat(6,1fr);border-top:1px solid var(--line);background:var(--surface);padding-bottom:env(safe-area-inset-bottom)}
+nav{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--line);background:var(--surface);padding-bottom:env(safe-area-inset-bottom)}
 nav button{border:0;background:transparent;padding:8px 2px 9px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted)}
 nav button svg{width:22px;height:22px}
 nav button.on{color:var(--gold);font-weight:700}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font-size:14px;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums}
+.pill.on{background:var(--ink);color:var(--ground);border-color:var(--ink)}
+.pill.sm{padding:4px 9px;font-size:12px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.field{display:flex;align-items:center;gap:8px;margin:8px 0;flex-wrap:wrap}
+.field label{font-size:14px;color:var(--muted);min-width:96px}
+.field input{width:110px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--ground);color:var(--ink);font:inherit;font-variant-numeric:tabular-nums}
+.res{display:grid;grid-template-columns:1fr auto;gap:6px 10px;font-variant-numeric:tabular-nums}
+.res .k{color:var(--muted);font-size:14px}
+.res .v{text-align:right;font-weight:700}
+.res .best{color:var(--ok)}
+.res .hl{background:var(--gold-soft);border-radius:6px;padding:0 6px}
+table.t{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+table.t th{font-size:12px;color:var(--muted);text-align:right;font-weight:400;padding:4px}
+table.t th:first-child,table.t td:first-child{text-align:left}
+table.t td{padding:6px 4px;border-top:1px solid var(--line);text-align:right}
+table.t tr.win td{color:var(--ok);font-weight:700}
+.ex{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px;border-top:1px solid var(--line);padding:6px 0}
+.x{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px}
 @media (prefers-reduced-motion:no-preference){.item,.tick{transition:background .15s,border-color .15s,opacity .15s}}
 </style>
 </head>
@@ -134,6 +154,7 @@ nav button.on{color:var(--gold);font-weight:700}
     <div class="seg"><button id="segZ" class="on">Ziyarah</button><button id="segP">Packing</button></div>
     <div class="progress" id="listProg"></div><div id="listBody"></div></section>
   <section class="view" id="v-money"><h2>Budget</h2><div id="moneyBody"></div></section>
+  <section class="view" id="v-tools"><h2>Money tools</h2><div id="toolsBody"></div></section>
   <section class="view" id="v-info"><h2>Bookings and contacts</h2><div id="infoBody"></div></section>
 </main>
 
@@ -143,6 +164,7 @@ nav button.on{color:var(--gold);font-weight:700}
   <button data-v="rounds" aria-label="Rounds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="8" height="8"/><circle cx="12" cy="12" r="10" stroke-dasharray="3 3"/></svg>Rounds</button>
   <button data-v="lists" aria-label="Lists"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 6h12M9 12h12M9 18h12M3 6l1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>Lists</button>
   <button data-v="money" aria-label="Budget"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="3"/></svg>Budget</button>
+  <button data-v="tools" aria-label="Tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h13l-3-3M20 17H7l3 3"/></svg>Convert</button>
   <button data-v="info" aria-label="Info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 11v6M12 7.5v.5"/></svg>Info</button>
 </nav>
 
@@ -153,7 +175,8 @@ const SHEET="https://docs.google.com/spreadsheets/d/1UTN3sdPywexuvMSmf-41RQPQqO0
 /* ---------- Data (from the Umrah Plan sheet) ---------- */
 const DAYS=[
  {id:"prep",date:null,label:"Before",title:"Before you go",items:[
-  ["15 Nov","Agoda charges €254.66 for Elaf Bakkah (18 to 24 Nov)","Free cancellation until 16 Nov, 23:59 Makkah time.","Agoda"],
+  ["Done","Both hotels booked and paid","Makkah: Al Shahba. Madinah: Burj Al Mukhtara. Elaf Bakkah and Al Ayniah are cancelled.","Agoda"],
+  ["Now","Cancel Najmat Quba on Booking.com","Free now. Keep Dar NURA only if you want a backup for Madinah.","Booking.com"],
   ["Done","Umrah permit booked: Thu 19 Nov, 14:01","QR code appears 2 hours before in Nusuk.","Nusuk"],
   ["By 17 Nov","Check your Rawdah permit: Thu 26 Nov, 02:00","Confirm it is under My Bookings in Nusuk and screenshot it.","Nusuk"],
   ["By 17 Nov","Save offline copies","Flight e-ticket, train tickets, hotel confirmations, visa, passport. Download offline maps of Makkah and Madinah.",""],
@@ -168,9 +191,9 @@ const DAYS=[
   ["01:35","Flight RJ704 Amman to Jeddah","When the crew announces the miqat, make the niyyah for Umrah and start the Talbiyah.","Royal Jordanian",1],
   ["03:45","Land at Jeddah T1, immigration, bag","Show passport and e-visa. Buy a SIM at the kiosks on the way to the station only if it is before 05:15.","E-visa"],
   ["06:05","Haramain train 05065 to Makkah","Coach 9, seat 255. Be at the platform by 05:30.","Haramain",1],
-  ["07:30","Taxi to Elaf Bakkah Hotel, check in","Ask reception to link your two bookings, and where the free shuttle drops you and picks you up.","Agoda"],
+  ["07:30","Taxi to Al Shahba Hotel, check in","Umm Al Qura Rd, Ajyad area. Room is booked from 18 Nov and the hotel knows you arrive 07:00 to 08:00. Ask for twin beds and the walking route to the Haram.","Agoda"],
   ["08:00","Sleep and eat, still in ihram","Wake by 11:45.",""],
-  ["12:07","Dhuhr at the Haram","Take the hotel shuttle.",""],
+  ["12:07","Dhuhr at the Haram","Walk from the hotel, about 15 minutes. Leave by 11:50.",""],
   ["12:25","Perform Umrah","Tawaf 7 rounds, 2 rak'ah behind Maqam Ibrahim, Zamzam, Sa'i 7, then shave or trim. Use the Rounds tab to count. If Asr (about 15:12) starts, pause, pray, continue.","Nusuk 14:01",1],
   ["Evening","Optional: thobe and SIM at the Clock Tower","STC and Mobily shops on floor P3 of Abraj Al Bait.",""]]},
  {id:"d3",date:"2026-11-20",label:"Fri 20",title:"Day 3 · Jumu'ah",city:"Makkah",items:[
@@ -178,22 +201,21 @@ const DAYS=[
   ["10:00","Leave for Jumu'ah","Dhuhr is about 12:10. Roads near the Haram close early.","",1],
   ["17:37","Maghrib and Isha at the Haram","Isha about 19:07.",""]]},
  {id:"d4",date:"2026-11-21",label:"Sat 21",title:"Day 4 · Makkah ziyarah",city:"Makkah",items:[
-  ["07:00","Makkah ziyarah by taxi (about 200 SAR)","Cave Hira first while it is cool, then Thawr, Arafat, Muzdalifah, Mina, Masjid Aisha. Tick places in Lists.","",1],
-  ["Today","Agoda charges €46.42 for 24 to 25 Nov","Charged to your card.","Agoda"]]},
+  ["07:00","Makkah ziyarah by taxi (about 150 SAR)","Cave Hira first while it is cool, then Thawr, Arafat, Muzdalifah, Mina, Masjid Aisha. Tick places in Lists.","",1]]},
  {id:"d5",date:"2026-11-22",label:"Sun 22",title:"Day 5 · Haram day",city:"Makkah",items:[
-  ["All day","Extra tawaf, Quran, du'a","",""],
-  ["23:59","Last free cancellation for 24 to 25 Nov","Only if your plans change.","Agoda"]]},
+  ["All day","Extra tawaf, Quran, du'a","",""]]},
  {id:"d6",date:"2026-11-23",label:"Mon 23",title:"Day 6 · Haram or Taif",city:"Makkah",items:[
   ["All day","Haram day, or optional Taif trip (about 250 SAR)","Taif is about 1.5 hours by car. Be back for Maghrib.",""]]},
  {id:"d7",date:"2026-11-24",label:"Tue 24",title:"Day 7 · Last full day in Makkah",city:"Makkah",items:[
-  ["12:00","Check the room switch","First booking ends, second starts. Confirm you keep the same room.","Agoda"],
-  ["Evening","Pack and message Al Ayniah Hotel","Tell them you arrive on 25 Nov between 16:00 and 18:00. Phone +966 557722180.","Booking.com"]]},
+  ["All day","Last full day in Makkah: tawaf, Quran, du'a","",""],
+  ["Evening","Pack for Madinah","Burj Al Mukhtara is paid. If you still hold Dar NURA as a backup, cancel it before 25 Nov 18:00.",""]]},
  {id:"d8",date:"2026-11-25",label:"Wed 25",title:"Day 8 · To Madinah",city:"Madinah",items:[
   ["After Fajr","Farewell tawaf (Tawaf al-Wada)","Your last act in Makkah before leaving.","",1],
-  ["09:30","Check out of Elaf Bakkah","Checkout is before 12:00.",""],
+  ["09:30","Check out of Al Shahba","Official checkout is 14:00, but leave by 09:45 for the train.",""],
   ["09:45","Taxi to Makkah Haramain station","Be at the station by 10:30.",""],
   ["11:20","Haramain train 01112 to Madinah","Coach 9, seat 243.","Haramain",1],
-  ["16:00","Check in at Al Ayniah Hotel","Window is 16:00 to 18:00. After 18:00 the hotel can charge SAR 483.86.","Booking.com",1],
+  ["14:30","Taxi to Burj Al Mukhtara Hotel, check in","King Faisal Rd, about 940 m (8 to 13 min walk) to Masjid an-Nabawi. Already paid. Check-in 16:00; if the room is not ready, leave your bag and go to the mosque. Check the room is clean.","Agoda",1],
+  ["By 16:00","Cancel Dar NURA if you still hold it","Free until 18:00 today in the Booking.com app.","Booking.com"],
   ["Evening","Maghrib and Isha at Masjid an-Nabawi","Sleep early: Rawdah is at 02:00.",""]]},
  {id:"d9",date:"2026-11-26",label:"Thu 26",title:"Day 9 · Rawdah",city:"Madinah",items:[
   ["01:30","Go to the Rawdah gate","Gate 37 per your notes. Nusuk QR ready.","Nusuk Rawdah"],
@@ -204,7 +226,7 @@ const DAYS=[
   ["10:00","Go early for Jumu'ah at Masjid an-Nabawi","Arrive 2 hours before.","",1]]},
  {id:"d11",date:"2026-11-28",label:"Sat 28",title:"Day 11 · Madinah ziyarah",city:"Madinah",items:[
   ["07:00","Pray 2 rak'ah at Masjid Quba","Make wudu at the hotel first.","",1],
-  ["Morning","Madinah ziyarah by taxi (about 230 SAR)","Uhud, Qiblatayn, Seven Mosques. Tick places in Lists.",""]]},
+  ["Morning","Madinah ziyarah by taxi (about 90 SAR)","Uhud, Qiblatayn, Seven Mosques. Tick places in Lists.",""]]},
  {id:"d12",date:"2026-11-29",label:"Sun 29",title:"Day 12 · Last day",city:"Madinah",items:[
   ["Day","Dates market, gifts, last prayers","",""],
   ["Evening","Pack, weigh bags, book taxi for 03:30","Checked bag 30 kg, carry-on 7 kg.",""]]},
@@ -252,37 +274,40 @@ const PACK=[
  ["Toiletries",[["Toothbrush, toothpaste, miswak","Checked"],["Razor or trimmer","Checked"],["Lip balm and unscented moisturiser","Checked"],["Unscented sunscreen","Checked"],["Attar (only after leaving ihram)","Checked"],["Liquids under 100 ml in a clear bag","Carry-on"]]],
  ["Health",[["Regular medicines","Carry-on"],["Painkillers","Carry-on"],["Plasters and blister pads","Carry-on"],["Oral rehydration salts","Checked"],["Throat lozenges","Checked"],["Face masks","Carry-on"],["Hand sanitiser","Carry-on"]]],
  ["Tech",[["Phone and charger","Carry-on"],["Power bank (never in checked bag)","Carry-on"],["Plug adapter, UK type G","Carry-on"],["Earphones","Carry-on"],["Offline maps downloaded","Phone"],["Apps installed and logged in","Phone"]]],
- ["Money",[["Bank cards","Carry-on"],["Cash, 300 to 500 SAR to start","Carry-on"],["Card for Al Ayniah deposit","Carry-on"]]],
+ ["Money",[["Bank cards","Carry-on"],["Euro cash to exchange in Saudi Arabia","Carry-on"],["Wipes and bathroom slippers","For the first check of the Madinah room"]]],
  ["Trip home",[["Foldable bag for dates and gifts","Checked"],["Weigh bags (30 kg / 7 kg)","29 Nov"],["Zamzam 5 L, buy at Madinah airport","Free, check-in"]]]
 ];
 
-const RATE=4.33;
+const RATE=4.33; /* plan rate, same as the Budget sheet */
 const BUDGET=[
  ["Flights · Royal Jordanian","Paid",468,"EUR"],
  ["Visa · Saudi tourist e-visa","Paid",93,"EUR"],
- ["Elaf Bakkah 18 to 24 Nov","Card 15 Nov",254.66,"EUR"],
- ["Elaf Bakkah 24 to 25 Nov","Card 21 Nov",46.42,"EUR"],
- ["Al Ayniah 25 to 30 Nov","Pay at hotel",988.76,"SAR"],
+ ["Al Shahba, Makkah, 18 to 25 Nov","Paid",148.18,"EUR"],
+ ["Burj Al Mukhtara, Madinah, 25 to 30 Nov","Paid",215.75,"EUR"],
  ["Train Jeddah Airport to Makkah","Paid",46,"SAR"],
  ["Train Makkah to Madinah","Paid",172,"SAR"],
- ["Train Soest to Düsseldorf and back","Estimate",30,"EUR"],
- ["Taxis to and from stations and airport","Estimate",170,"SAR"],
- ["Makkah ziyarah taxi","Estimate",200,"SAR"],
- ["Madinah ziyarah taxi","Estimate",230,"SAR"],
- ["Extra Careem and Makkah Bus","Estimate",100,"SAR"],
- ["Taif day trip","Optional",250,"SAR"],
- ["Food, 12 days at €20","Estimate",240,"EUR"],
+ ["Taxi Makkah station to hotel, 19 Nov","Estimate",25,"SAR"],
+ ["Taxi hotel to Makkah station, 25 Nov","Estimate",20,"SAR"],
+ ["Taxi Madinah station to hotel, 25 Nov","Estimate",30,"SAR"],
+ ["Taxi hotel to Madinah airport, 30 Nov","Estimate",25,"SAR"],
+ ["Makkah ziyarah taxi","Estimate",150,"SAR"],
+ ["Madinah ziyarah taxi","Estimate",90,"SAR"],
+ ["Food, 65 SAR a day for 12 days","Estimate",780,"SAR"],
  ["Saudi SIM","Estimate",70,"SAR"],
  ["2 thobes","Estimate",200,"SAR"],
  ["Dates and gifts","Estimate",300,"SAR"],
- ["Barber, laundry, Zamzam","Estimate",105,"SAR"],
- ["Buffer","Estimate",100,"EUR"]
+ ["Barber","Estimate",30,"SAR"],
+ ["Laundry","Estimate",60,"SAR"],
+ ["Zamzam 5 L","Estimate",15,"SAR"],
+ ["Taif day trip","Optional",250,"SAR"],
+ ["Buffer for surprises","Optional",100,"EUR"]
 ];
 
 const INFO=[
  ["Flights","Royal Jordanian","Out: RJ130 Wed 18 Nov 15:00 DUS→AMM, RJ704 Thu 19 Nov 01:35 AMM→JED T1. Back: RJ723 Mon 30 Nov 07:00 MED→AMM, RJ129 10:55 AMM→DUS. 1 × 30 kg checked, 7 kg carry-on. Customer service +962 6 5100000."],
- ["Makkah hotel","Elaf Bakkah Hotel","Al Rahmah St, Mahbas Al Jan. Phone +966 12 529 8822. Two Agoda bookings: 18 to 24 Nov and 24 to 25 Nov. Free 24/7 shuttle to the Haram."],
- ["Madinah hotel","Al Ayniah Hotel","Prince Abdul Majeed St, Al Anbariyah. Phone +966 557722180. Booked on Booking.com. Check-in 16:00 to 18:00 on 25 Nov. SAR 988.76 paid at the hotel."],
+ ["Makkah hotel","Al Shahba Hotel","Umm Al Qura Rd, Al Hafair (Ajyad area). About 1.4 km, 15 min walk to the Haram. Twin room, private bathroom. Paid on Agoda, 18 to 25 Nov. Hotel knows you arrive 19 Nov, 07:00 to 08:00."],
+ ["Madinah hotel","Burj Al Mukhtara Hotel","King Faisal Rd, Al Mokhtara Tower. About 940 m to Masjid an-Nabawi. Double room 12 m². Paid on Agoda, 25 to 30 Nov. Check-in 16:00, check-out 12:00."],
+ ["Madinah backups","Booking.com","Najmat Quba: cancel. Dar NURA: backup only, cancel before 25 Nov 18:00. Al Ayniah is already cancelled."],
  ["Trains","Haramain High Speed Railway","19 Nov 06:05 train 05065, coach 9 seat 255. 25 Nov 11:20 train 01112, coach 9 seat 243. Tickets in Apple Wallet."],
  ["Visa","Saudi tourist e-visa","Multiple entry, valid to 31 Jul 2027, up to 90 days."],
  ["Permits","Nusuk","Umrah: Thu 19 Nov, 14:01. Rawdah: Thu 26 Nov, 02:00, gate 37."],
@@ -291,7 +316,11 @@ const INFO=[
 ];
 
 /* ---------- State (kept on this device only) ---------- */
-let S={done:{},actual:{},tawaf:0,sai:0,list:"z"};
+let S={done:{},act:{},ex:[],tawaf:0,sai:0,list:"z",
+  rates:{SAR:4.192,BDT:137.48,t:"15 Nov 2026 (saved)"},gold:{usd:3866.51,t:"12 Nov 2026 (saved)"},
+  conv:{amt:"100",cur:"SAR"},cmpEur:"200",cmp:["","",""],exEur:"200",exRate:"",exWhere:"Makkah",gw:"50",gk:22,gsar:""};
+/* BAJUS official prices per gram, incl. VAT, 11 Nov 2026 */
+const BAJUS={22:19220,21:18355,18:15765};
 function load(){try{const t=localStorage.getItem("umrah-companion");if(t)S=Object.assign(S,JSON.parse(t));}catch(e){}}
 function save(){try{localStorage.setItem("umrah-companion",JSON.stringify(S));}catch(e){}}
 
@@ -366,33 +395,102 @@ function renderLists(){
   $("#listProg").textContent=`${dn} of ${all} ${isZ?"visited":"packed"}`;
   $("#listBody").innerHTML=html;
 }
+function actRate(){const e=S.ex.reduce((a,x)=>a+(+x.eur||0),0),r=S.ex.reduce((a,x)=>a+(+x.eur||0)*(+x.rate||0),0);return e>0?r/e:RATE;}
+function fmtNum(v,d=0){return (+v).toLocaleString("en-GB",{minimumFractionDigits:d,maximumFractionDigits:d});}
 function renderMoney(){
   const eur=b=>b[3]==="EUR"?b[2]:b[2]/RATE;
   const sum=f=>BUDGET.filter(f).reduce((a,b)=>a+eur(b),0);
-  const paid=sum(b=>b[1]==="Paid"),card=sum(b=>b[1].startsWith("Card")),hotel=sum(b=>b[1]==="Pay at hotel"),est=sum(b=>b[1]==="Estimate"),opt=sum(b=>b[1]==="Optional");
-  const total=paid+card+hotel+est;
-  const actual=Object.values(S.actual).reduce((a,v)=>a+(parseFloat(v)||0),0);
+  const paid=sum(b=>b[1]==="Paid"),est=sum(b=>b[1]==="Estimate"),opt=sum(b=>b[1]==="Optional");
+  const cashSAR=BUDGET.filter(b=>b[1]==="Estimate"&&b[3]==="SAR").reduce((a,b)=>a+b[2],0);
+  const ar=actRate();
+  const actEUR=a=>a&&a.v!==""&&!isNaN(parseFloat(a.v))?(a.c==="SAR"?parseFloat(a.v)/ar:parseFloat(a.v)):null;
+  const spent=BUDGET.reduce((t,b)=>{const v=actEUR(S.act[b[0]]);return t+(v||0);},0);
+  const exE=S.ex.reduce((a,x)=>a+(+x.eur||0),0),exS=S.ex.reduce((a,x)=>a+(+x.eur||0)*(+x.rate||0),0);
   let html=`<div class="tiles">
-    <div class="tile hero"><span>Planned total (without Taif)</span><b>${fmtEUR(total)}</b></div>
+    <div class="tile hero"><span>Planned total (without Taif and buffer)</span><b>${fmtEUR(paid+est)}</b></div>
     <div class="tile"><span>Already paid</span><b>${fmtEUR(paid)}</b></div>
-    <div class="tile"><span>Card charges coming</span><b>${fmtEUR(card)}</b></div>
-    <div class="tile"><span>Pay at Madinah hotel</span><b>${fmtEUR(hotel)}</b></div>
-    <div class="tile"><span>Spending in Saudi</span><b>${fmtEUR(est)}</b></div>
-    <div class="tile"><span>Spent so far (your entries)</span><b>${fmtEUR(actual)}</b></div>
-    <div class="tile"><span>Taif, if you go</span><b>${fmtEUR(opt)}</b></div>
-  </div><div class="hint">Rate 4.33 SAR per euro. Type what you actually spent (in €) under each item.</div><h3>Items</h3><div class="list">`;
+    <div class="tile"><span>Still to spend</span><b>${fmtEUR(est)}</b></div>
+    <div class="tile"><span>Cash needed in Saudi</span><b>${fmtNum(cashSAR)} SAR</b></div>
+    <div class="tile"><span>Spent so far (your entries)</span><b>${fmtEUR(spent)}</b></div>
+    <div class="tile"><span>Food per day</span><b>65 SAR</b></div>
+    <div class="tile"><span>Taif and buffer, if needed</span><b>${fmtEUR(opt)}</b></div>
+  </div>
+  <h3>Money exchanged</h3><div class="box">
+    <div class="res"><div class="k">Your rate (average)</div><div class="v">${S.ex.length?fmtNum(ar,4):"not yet (plan uses "+RATE+")"}</div>
+    <div class="k">Exchanged so far</div><div class="v">€${fmtNum(exE)} → ${fmtNum(exS)} SAR</div></div>
+    ${S.ex.map((x,i)=>`<div class="ex"><span>${esc(x.where)} · €${fmtNum(x.eur)} at ${fmtNum(x.rate,2)} = <b>${fmtNum(x.eur*x.rate)} SAR</b></span><button class="x" data-exdel="${i}" aria-label="Delete">×</button></div>`).join("")}
+    <div class="field"><label>Euros</label><div class="pills">${[50,100,200,300,500].map(v=>`<button class="pill sm${S.exEur==v?" on":""}" data-exeur="${v}">€${v}</button>`).join("")}</div></div>
+    <div class="field"><label>Where</label><div class="pills">${["Makkah","Madinah","ATM"].map(v=>`<button class="pill sm${S.exWhere===v?" on":""}" data-exwhere="${v}">${v}</button>`).join("")}</div></div>
+    <div class="field"><label for="exRate">Rate on board</label><input id="exRate" inputmode="decimal" placeholder="4.20" data-f="exRate" value="${esc(S.exRate)}">
+      <button class="pill" data-exadd="1">Add</button></div>
+    ${S.exRate&&!isNaN(parseFloat(S.exRate))?`<div class="hint">You get ${fmtNum(S.exEur*parseFloat(S.exRate.replace(",",".")))} SAR for €${S.exEur}.</div>`:""}
+  </div>
+  <h3>Items</h3><div class="hint" style="margin:-4px 0 8px">Type what you paid, tap SAR or EUR. SAR is converted with your rate above.</div><div class="list">`;
   BUDGET.forEach((b,i)=>{
-    const plan=eur(b),a=S.actual[i];const diff=a!==undefined&&a!==""?(parseFloat(a)-plan):null;
-    html+=`<div class="money"><div class="what">${esc(b[0])}<span class="badge">${esc(b[1])}</span></div><div class="amt">${fmtEUR(plan)}</div>
-      <div class="sub">${b[3]==="SAR"?esc(b[2].toLocaleString("en-GB"))+" SAR · ":""}<label for="act${i}">Actual €</label><input id="act${i}" inputmode="decimal" data-a="${i}" value="${a!==undefined?esc(a):""}">
+    const plan=eur(b),a=S.act[b[0]]||{v:"",c:b[3]},v=actEUR(a),diff=v===null?null:v-plan;
+    html+=`<div class="money"><div class="what">${esc(b[0])}<span class="badge">${esc(b[1])}</span></div><div class="amt">${b[3]==="SAR"?fmtNum(b[2])+" SAR":fmtEUR(plan)}</div>
+      <div class="sub"><input id="act${i}" aria-label="Actual paid" inputmode="decimal" data-a="${esc(b[0])}" value="${esc(a.v)}" placeholder="paid">
+      <button class="pill sm${a.c==="SAR"?" on":""}" data-cur="${esc(b[0])}" data-c="SAR">SAR</button><button class="pill sm${a.c==="EUR"?" on":""}" data-cur="${esc(b[0])}" data-c="EUR">EUR</button>
       ${diff!==null&&!isNaN(diff)?`<span class="${diff>0?"over":"under"}">${diff>0?"+":""}${fmtEUR(diff).replace("€-","-€")}</span>`:""}</div></div>`;
   });
   $("#moneyBody").innerHTML=html+"</div>";
 }
+/* ---------- Money tools ---------- */
+function rateTo(c){return c==="EUR"?1:S.rates[c];}            /* units of c per 1 EUR */
+function conv(v,from,to){return v/rateTo(from)*rateTo(to);}
+function renderTools(){
+  const R=S.rates,amt=parseFloat(String(S.conv.amt).replace(",","."))||0;
+  let html=`<div class="box"><div class="res"><div class="k">1 EUR</div><div class="v">${fmtNum(R.SAR,3)} SAR · ${fmtNum(R.BDT,2)} BDT</div>
+    <div class="k">1 SAR</div><div class="v">${fmtNum(R.BDT/R.SAR,2)} BDT</div></div>
+    <div class="hint">Market rates, ${esc(R.t)}. <button class="pill sm" data-refresh="1">Update now</button></div></div>
+  <h3>Quick converter</h3><div class="box">
+    <div class="field"><label for="convAmt">Amount</label><input id="convAmt" inputmode="decimal" data-f="convAmt" value="${esc(S.conv.amt)}">
+      <div class="pills">${["SAR","BDT","EUR"].map(c=>`<button class="pill${S.conv.cur===c?" on":""}" data-conv="${c}">${c}</button>`).join("")}</div></div>
+    <div class="res">${["SAR","BDT","EUR"].map(c=>`<div class="k">${c}</div><div class="v${c===S.conv.cur?" hl":""}" data-out="${c}">${fmtNum(conv(amt,S.conv.cur,c),2)}</div>`).join("")}</div></div>`;
+  /* compare exchange offers */
+  const e=parseFloat(String(S.cmpEur).replace(",","."))||0;
+  const rows=[["Market rate (reference)",R.SAR,0],["Bank in Germany (about 7% less)",R.SAR*0.93,1]];
+  S.cmp.forEach((r,i)=>{const v=parseFloat(String(r).replace(",","."));if(!isNaN(v))rows.push([`Offer ${"ABC"[i]}`,v,1]);});
+  const best=Math.max(...rows.filter(r=>r[2]).map(r=>r[1]));
+  html+=`<h3>Compare exchange offers</h3><div class="box">
+    <div class="field"><label>Euros</label><div class="pills">${[100,200,300,500].map(v=>`<button class="pill sm${S.cmpEur==v?" on":""}" data-cmpeur="${v}">€${v}</button>`).join("")}</div></div>
+    <div class="field"><label>Rates you see</label>${[0,1,2].map(i=>`<input aria-label="Offer ${"ABC"[i]}" inputmode="decimal" placeholder="${"ABC"[i]}: 4.20" data-cmp="${i}" value="${esc(S.cmp[i])}" style="width:84px">`).join("")}</div>
+    <table class="t"><tr><th>Option</th><th>Rate</th><th>You get</th></tr>
+    ${rows.map(r=>`<tr class="${r[2]&&r[1]===best?"win":""}"><td>${esc(r[0])}</td><td>${fmtNum(r[1],3)}</td><td>${fmtNum(e*r[1])} SAR</td></tr>`).join("")}</table></div>`;
+  /* gold */
+  const w=parseFloat(String(S.gw).replace(",","."))||0,k=S.gk,pur=k/24,usdg=S.gold.usd/31.1035;
+  const usdEUR=1/ (S.rates.USD||1.1024); /* EUR per USD */
+  const g24eur=usdg*usdEUR;
+  const deG=g24eur*pur*1.03;
+  const bdG=BAJUS[k]?BAJUS[k]:g24eur*pur*R.BDT*1.3;
+  const shop=parseFloat(String(S.gsar).replace(",","."));
+  const saG=!isNaN(shop)?shop:g24eur*pur*R.SAR;
+  const list=[["Germany",deG,"EUR",deG,"spot + 3% dealer"],["Bangladesh",bdG,"BDT",bdG/R.BDT,BAJUS[k]?"BAJUS 11 Nov":"estimate"],["Saudi Arabia",saG,"SAR",saG/R.SAR,!isNaN(shop)?"your shop price":"spot price"]];
+  const min=Math.min(...list.map(x=>x[3]));
+  html+=`<h3>Gold price comparison</h3><div class="box">
+    <div class="field"><label for="gw">Weight (g)</label><input id="gw" inputmode="decimal" data-f="gw" value="${esc(S.gw)}"><span class="hint" style="margin:0">${fmtNum(w/11.664,2)} bhori</span></div>
+    <div class="field"><label>Karat</label><div class="pills">${[24,22,21,18].map(v=>`<button class="pill${k===v?" on":""}" data-gk="${v}">${v}K</button>`).join("")}</div></div>
+    <div class="field"><label for="gsar">Saudi shop SAR/g</label><input id="gsar" inputmode="decimal" placeholder="optional" data-f="gsar" value="${esc(S.gsar)}"></div>
+    <table class="t"><tr><th>Country</th><th>Per gram</th><th>Total</th><th>Total €</th></tr>
+    ${list.map(x=>`<tr class="${x[3]===min?"win":""}"><td>${x[0]}<br><span class="hint" style="margin:0;font-size:12px">${x[4]}</span></td><td>${fmtNum(x[1],x[2]==="BDT"?0:2)} ${x[2]}</td><td>${fmtNum(x[1]*w,0)} ${x[2]}</td><td>${fmtEUR(x[3]*w)}</td></tr>`).join("")}</table>
+    <div class="hint">Gold spot $${fmtNum(S.gold.usd,2)}/oz, ${esc(S.gold.t)}. Saudi shops add a making charge; type their full price per gram for a fair comparison.</div></div>`;
+  $("#toolsBody").innerHTML=html;
+}
+async function refreshRates(manual){
+  const stamp=()=>new Date().toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+  let ok=false;
+  try{const r=await fetch("https://open.er-api.com/v6/latest/EUR",{cache:"no-store"});const j=await r.json();
+    if(j&&j.rates&&j.rates.SAR){S.rates={SAR:j.rates.SAR,BDT:j.rates.BDT,USD:j.rates.USD,t:stamp()};ok=true;}}catch(e){}
+  try{const r=await fetch("https://api.gold-api.com/price/XAU",{cache:"no-store"});const j=await r.json();
+    if(j&&j.price){S.gold={usd:+j.price,t:stamp()};}}catch(e){}
+  save();if(current==="tools"||current==="money")renderAll();
+  if(manual&&!ok)alertless("Offline: using the last saved rates.");
+}
+function alertless(m){const h=document.querySelector("#toolsBody .hint");if(h)h.textContent=m;}
 function renderInfo(){
   $("#infoBody").innerHTML=INFO.map(x=>`<div class="card"><h3 style="margin:0 0 4px">${esc(x[0])}</h3><div class="what">${esc(x[1])}</div><div class="det">${esc(x[2])}</div></div>`).join("")+
   `<div class="card"><div class="what">Full plan and sources</div><div class="det">Your Google Sheet has every detail and source link, and works offline in the Google Sheets app.</div><a href="${SHEET}">Open Umrah Plan sheet</a></div>
-   <div class="hint">Booking numbers, visa number and PNR are left out of this app on purpose; they are in your Google Sheet. Ticks and amounts are saved on this phone only.</div>`;
+   <div class="hint">Booking numbers, visa number and PNR are left out of this app on purpose; they are in your Google Sheet. Ticks, amounts and exchanges are saved on this phone only. Rates update when you are online and are kept for offline use.</div>`;
 }
 function counterHTML(id,name,n,hint){
   const dirs=["Start at Safa","Safa → Marwa","Marwa → Safa"];
@@ -412,7 +510,7 @@ function renderRounds(){
 }
 
 /* ---------- Navigation and events ---------- */
-const VIEWS=["today","plan","rounds","lists","money","info"];
+const VIEWS=["today","plan","rounds","lists","money","tools","info"];
 let current="today";
 function show(v){
   if(!VIEWS.includes(v))v="today";current=v;
@@ -423,7 +521,7 @@ function show(v){
 }
 function renderAll(){
   renderHeader();
-  ({today:renderToday,plan:renderPlan,rounds:renderRounds,lists:renderLists,money:renderMoney,info:renderInfo})[current]();
+  ({today:renderToday,plan:renderPlan,rounds:renderRounds,lists:renderLists,money:renderMoney,tools:renderTools,info:renderInfo})[current]();
 }
 document.addEventListener("click",e=>{
   const t=e.target.closest("button");if(!t)return;
@@ -433,13 +531,31 @@ document.addEventListener("click",e=>{
   if(t.dataset.inc){S[t.dataset.inc]=Math.min(7,S[t.dataset.inc]+1);save();renderRounds();if(navigator.vibrate)try{navigator.vibrate(30)}catch(_){};return;}
   if(t.dataset.undo){S[t.dataset.undo]=Math.max(0,S[t.dataset.undo]-1);save();renderRounds();return;}
   if(t.dataset.reset){S[t.dataset.reset]=0;save();renderRounds();return;}
+  if(t.dataset.cur){const n=t.dataset.cur;S.act[n]=Object.assign({v:""},S.act[n],{c:t.dataset.c});save();renderMoney();return;}
+  if(t.dataset.exeur){S.exEur=+t.dataset.exeur;save();renderMoney();return;}
+  if(t.dataset.exwhere){S.exWhere=t.dataset.exwhere;save();renderMoney();return;}
+  if(t.dataset.exadd){const r=parseFloat(String(S.exRate).replace(",","."));if(!isNaN(r)&&r>0){S.ex.push({eur:+S.exEur,rate:r,where:S.exWhere});S.exRate="";save();renderMoney();}return;}
+  if(t.dataset.exdel){S.ex.splice(+t.dataset.exdel,1);save();renderMoney();return;}
+  if(t.dataset.conv){S.conv.cur=t.dataset.conv;save();renderTools();return;}
+  if(t.dataset.cmpeur){S.cmpEur=+t.dataset.cmpeur;save();renderTools();return;}
+  if(t.dataset.gk){S.gk=+t.dataset.gk;save();renderTools();return;}
+  if(t.dataset.refresh){refreshRates(true);return;}
   if(t.id==="segZ"){S.list="z";save();renderLists();return;}
   if(t.id==="segP"){S.list="p";save();renderLists();return;}
 });
 document.addEventListener("change",e=>{
-  const a=e.target.dataset&&e.target.dataset.a;if(a===undefined)return;
-  const v=e.target.value.replace(",",".").trim();
-  if(v==="")delete S.actual[a];else S.actual[a]=v;save();renderMoney();
+  const d=e.target.dataset||{};const v=e.target.value.replace(",",".").trim();
+  if(d.a!==undefined){const n=d.a,b=BUDGET.find(x=>x[0]===n);S.act[n]=Object.assign({c:b?b[3]:"SAR"},S.act[n],{v});save();renderMoney();return;}
+  if(d.cmp!==undefined){S.cmp[+d.cmp]=v;save();renderTools();return;}
+  if(d.f==="exRate"){S.exRate=v;save();renderMoney();return;}
+  if(d.f==="gw"){S.gw=v;save();renderTools();return;}
+  if(d.f==="gsar"){S.gsar=v;save();renderTools();return;}
+});
+/* live update of the quick converter while typing */
+document.addEventListener("input",e=>{
+  if(e.target.dataset&&e.target.dataset.f==="convAmt"){S.conv.amt=e.target.value;save();
+    const a=parseFloat(e.target.value.replace(",","."))||0;
+    ["SAR","BDT","EUR"].forEach(c=>{const o=document.querySelector(`[data-out="${c}"]`);if(o)o.textContent=fmtNum(conv(a,S.conv.cur,c),2);});}
 });
 window.addEventListener("hashchange",()=>show(location.hash.slice(1)));
 
@@ -449,6 +565,7 @@ function start(data){
   window.claude?.hot?.snapshot?.(()=>({S}));
   show(location.hash.slice(1)||"today");
   setInterval(renderHeader,30000);
+  if(navigator.onLine!==false)refreshRates(false);
 }
 window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
 if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{});});}
