@@ -233,6 +233,14 @@ table.t tr.win td{color:var(--ok);font-weight:700}
 .addli input{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface);color:var(--ink);font:inherit;font-size:15px}
 .ref.rm{background:none;cursor:pointer;margin-left:4px}
 .addbox{margin-top:16px}.lblh{font-weight:700;color:var(--brand)}
+.grpb.pad{padding:4px 14px 14px}
+.grpb.pad .list .money:last-child{border-bottom:0}
+.grp summary .cnt{white-space:nowrap;margin-left:8px}
+.fg{display:grid;grid-template-columns:44px repeat(4,1fr) 40px;gap:5px;align-items:center;padding:5px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.fg.fh{font-size:10.5px;color:var(--muted);text-align:center;border-bottom:0;padding-top:10px}
+.fg input{width:100%;min-width:0;padding:8px 4px;text-align:center;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--ink);font:inherit;font-size:14px}
+.fg .fd{font-size:11.5px;line-height:1.15;color:var(--muted)}
+.fg b{text-align:right;font-size:14px}
 @media (max-width:360px){.stats{grid-template-columns:1fr 1fr}.grid4{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:no-preference){.tick,.pill,.chip{transition:background .15s,border-color .15s,color .15s}}
 </style>
@@ -416,7 +424,7 @@ const INFO=[
 let S={done:{},act:{},ex:[],tawaf:0,sai:0,list:"z",
   rates:{SAR:4.192,BDT:137.48,t:"15 Nov 2026 (saved)"},gold:{usd:3866.51,t:"12 Nov 2026 (saved)"},
   conv:{amt:"100",cur:"SAR"},cmpEur:"200",cmp:["","",""],exEur:"200",exRate:"",exWhere:"Makkah",gw:"50",gk:22,
-  extra:[],myPlan:{},myList:{},newCat:"Food",newV:"",newC:"SAR",newN:"",newD:"",exFee:"",exFeeC:"SAR",exFinal:"",open:{},
+  extra:[],food:{},myPlan:{},myList:{},newCat:"Taxi",newV:"",newC:"SAR",newN:"",newD:"",exFee:"",exFeeC:"SAR",exFinal:"",open:{},
   shops:[
    {name:"Germany dealer",cur:"EUR",price:"",mk:"",mkT:"%",vat:"0",vatOn:"all",prem:3,note:"Bars and coins: no VAT. For jewellery set VAT 19% and add making."},
    {name:"Bangladesh (BAJUS)",cur:"BDT",price:"",mk:"",mkT:"%",vat:"0",vatOn:"all",note:"BAJUS price already includes 5% VAT."},
@@ -427,7 +435,7 @@ const BAJUS={22:19220,21:18355,18:15765};
 function load(){try{const t=localStorage.getItem("umrah-companion");if(t)S=Object.assign(S,JSON.parse(t));}catch(e){}
   /* Items marked "Done" in the plan start ticked (once). */
   ["extra","shops","ex"].forEach(k=>{if(!Array.isArray(S[k]))delete S[k];});
-  ["myPlan","myList"].forEach(k=>{if(!S[k]||typeof S[k]!=="object")S[k]={};});
+  ["myPlan","myList","food"].forEach(k=>{if(!S[k]||typeof S[k]!=="object")S[k]={};});
   if(!S.seeded){DAYS.forEach(d=>d.items.forEach((it,j)=>{if(it[0]==="Done")S.done[d.id+"-"+j]=true;}));S.seeded=1;}}
 function save(){try{localStorage.setItem("umrah-companion",JSON.stringify(S));return true;}catch(e){return false;}}
 
@@ -552,7 +560,7 @@ function renderLists(){
     let gd=0;const rows=items.map(({it,k,mine})=>{all++;const d=!!S.done[k];if(d){dn++;gd++;}
       return `<div class="chkrow"><button class="chk${d?" done":""}" data-k="${k}" aria-pressed="${d}"><span class="box2">${CHECK}</span><span class="txt"><b>${esc(it[0])}</b>${it[1]?`<small>${esc(it[1])}</small>`:""}</span></button>${mine?`<button class="x" data-ldel="${gid}:${mine}" aria-label="Remove ${esc(it[0])}">×</button>`:""}</div>`;}).join("")+
       `<div class="addli"><input placeholder="Add an item" data-lnew="${gid}" aria-label="Add an item to ${esc(g[0])}"><button class="pill sm solid" data-ladd="${gid}">Add</button></div>`;
-    const open=S.open[(isZ?"z":"p")+gi]!==false;
+    const open=!!OPEN[gid];
     html+=`<details class="grp" ${open?"open":""} data-g="${isZ?"z":"p"}${gi}"><summary><span>${esc(g[0])}</span><span class="cnt${gd===items.length?" full":""}">${gd}/${items.length}</span></summary><div class="grpb">${rows}</div></details>`;
   });
   $("#listProg").innerHTML=`<div class="bar"><i style="width:${all?Math.round(dn/all*100):0}%"></i></div><div class="progress">${dn} of ${all} ${isZ?"places visited":"items packed"}</div>`;
@@ -575,7 +583,17 @@ const num=v=>{const n=parseFloat(String(v??"").replace(",","."));return isNaN(n)
 /* Items already paid start with their real price; you can change it. */
 function getAct(b){return S.act[b[0]]||(b[1]==="Paid"?{v:String(b[2]),c:b[3]}:{v:"",c:b[3]});}
 function curSeg(attr,id,c){return `<span class="segc">${["SAR","EUR"].map(x=>`<button class="${c===x?"on":""}" ${attr}="${esc(id)}" data-c="${x}">${x}</button>`).join("")}</span>`;}
-const CATS=["Food","Taxi","Shopping","Gift","Other"];
+const CATS=["Taxi","Shopping","Gift","Food","Other"];
+/* blocks start closed every time the app opens; open state is kept only while it is open */
+const OPEN={};
+function blk(id,title,meta,body){return `<details class="grp" data-g="${id}" ${OPEN[id]?"open":""}><summary><span>${title}</span><span class="cnt" id="m-${id}">${meta}</span></summary><div class="grpb pad">${body}</div></details>`;}
+const SECTIONS=[["Flights and visa",[0,1]],["Hotels",[2,3]],["Trains and taxis",[4,5,6,7,8,9,10,11]],["Food",[12]],["SIM, shopping and services",[13,14,15,16,17,18]],["Optional",[19,20]]];
+const FOOD_DAYS=Array.from({length:12},(_,i)=>addDays("2026-11-19",i));
+const MEALS=[["b","Breakfast"],["l","Lunch"],["d","Dinner"],["o","Other"]];
+const foodDay=d=>{const f=S.food[d]||{};return MEALS.reduce((a,[k])=>a+(num(f[k])||0),0);};
+const foodTotal=()=>FOOD_DAYS.reduce((a,d)=>a+foodDay(d),0);
+const foodDaysUsed=()=>FOOD_DAYS.filter(d=>foodDay(d)>0).length;
+function foodMeta(){const t=foodTotal(),n=foodDaysUsed();return `${fmtNum(t)} of 780 SAR${n?` · avg ${fmtNum(t/n)}/day`:""}`;}
 function renderMoney(){
   const eur=b=>b[3]==="EUR"?b[2]:b[2]/RATE;
   const sum=f=>BUDGET.filter(f).reduce((a,b)=>a+eur(b),0);
@@ -583,7 +601,8 @@ function renderMoney(){
   const cashSAR=BUDGET.filter(b=>b[1]==="Estimate"&&b[3]==="SAR").reduce((a,b)=>a+b[2],0);
   const ar=actRate();
   const toE=(v,c)=>v===null?null:(c==="SAR"?v/ar:v);
-  const spentItems=BUDGET.reduce((t,b)=>{const a=getAct(b);return t+(toE(num(a.v),a.c)||0);},0);
+  const actE=i=>i===12?(foodTotal()?foodTotal()/ar:null):toE(num(getAct(BUDGET[i]).v),getAct(BUDGET[i]).c);
+  const spentItems=BUDGET.reduce((t,b,i)=>t+(actE(i)||0),0);
   const spentExtra=S.extra.reduce((t,x)=>t+(toE(num(x.v),x.c)||0),0);
   const spent=spentItems+spentExtra;
   const exE=S.ex.reduce((a,x)=>a+(+x.eur||0),0),exS=S.ex.reduce((a,x)=>a+exSar(x),0);
@@ -594,21 +613,33 @@ function renderMoney(){
     <div><span>Already paid</span><b>${fmtEUR(paid)}</b></div>
     <div><span>Still to spend</span><b>${fmtEUR(est)}</b></div>
     <div><span>Cash in Saudi</span><b>${fmtNum(cashSAR)} SAR</b></div>
-    <div><span>Food per day</span><b>65 SAR</b></div>
+    <div><span>Food so far</span><b>${fmtNum(foodTotal())} SAR</b></div>
     <div><span>Extra spending</span><b>${fmtEUR(spentExtra)}</b></div>
     <div><span>Taif + buffer</span><b>${fmtEUR(opt)}</b></div>
   </div>
-  <h3>Add an expense</h3><div class="box">
+  <h3>Expenses</h3>`;
+  SECTIONS.forEach(([name,idx],si)=>{
+    const pl=idx.reduce((a,i)=>a+eur(BUDGET[i]),0),ac=idx.reduce((a,i)=>a+(actE(i)||0),0);
+    let body;
+    if(name==="Food"){
+      body=`<div class="fg fh"><span></span>${MEALS.map(m=>`<span>${m[1]}</span>`).join("")}<span>Total</span></div>`+
+        FOOD_DAYS.map(d=>{const f=S.food[d]||{},t=foodDay(d);
+          return `<div class="fg"><span class="fd">${fmtDay(d).replace(/^(\w+) /,"$1<br>")}</span>${MEALS.map(([k,l])=>`<input inputmode="decimal" aria-label="${l} on ${fmtDay(d)}" data-food="${d}:${k}" value="${esc(f[k]||"")}">`).join("")}<b data-ftot="${d}" class="${t>65?"over":""}">${t?fmtNum(t):"–"}</b></div>`;}).join("")+
+        `<div class="hint">In SAR. Budget 65 SAR a day, 780 SAR for 12 days. Totals over 65 turn red.</div>`;
+      html+=blk("food","Food",foodMeta(),body);return;
+    }
+    body=`<div class="list">`+idx.map(i=>{const b=BUDGET[i],a=getAct(b),v=actE(i),diff=v===null?null:v-eur(b);
+      return `<div class="money"><div class="what">${esc(b[0])}<span class="badge">${esc(b[1])}</span></div><div class="amt">${b[3]==="SAR"?fmtNum(b[2])+" SAR":fmtEUR(eur(b))}</div>
+      <div class="sub"><input id="act${i}" aria-label="Paid for ${esc(b[0])}" inputmode="decimal" data-a="${esc(b[0])}" value="${esc(a.v)}" placeholder="paid">${curSeg("data-cur",b[0],a.c)}
+      ${diff!==null&&Math.abs(diff)>=0.5?`<span class="${diff>0?"over":"under"}">${diff>0?"+":"-"}${fmtEUR(Math.abs(diff))}</span>`:""}</div></div>`;}).join("")+`</div>`;
+    html+=blk("s"+si,name,`${fmtEUR(ac)} of ${fmtEUR(pl)}`,body);
+  });
+  html+=blk("extra","Other expenses",`${S.extra.length} · ${fmtEUR(spentExtra)}`,`
     <div class="pills">${CATS.map(c=>`<button class="pill${S.newCat===c?" on":""}" data-newcat="${c}">${c}</button>`).join("")}</div>
     <div class="field"><input id="newV" inputmode="decimal" placeholder="Amount" data-f="newV" value="${esc(S.newV)}">${curSeg("data-newc","x",S.newC)}<input type="date" id="newD" data-f="newD" value="${esc(S.newD||today())}" style="width:auto"></div>
-    <div class="field"><input id="newN" class="wide" placeholder="Note, e.g. Al Baik lunch" data-f="newN" value="${esc(S.newN)}"><button class="pill solid" data-addx="1">Add</button></div>
-    ${S.extra.length?`<div class="xl">${S.extra.map((x,i)=>({x,i})).sort((a,b)=>(b.x.d||"").localeCompare(a.x.d||"")).map(({x,i})=>`<div class="ex"><span><b>${esc(x.cat)}</b> · ${fmtNum(num(x.v),2)} ${x.c}${x.c==="SAR"?` <small>(${fmtEUR(toE(num(x.v),"SAR"))})</small>`:""}<small class="dl">${fmtDay(x.d)}${x.n?" · "+esc(x.n):""}</small></span><button class="x" data-xdel="${i}" aria-label="Delete ${esc(x.cat)} expense">×</button></div>`).join("")}</div>`:`<div class="hint">Tap a category, type the amount, tap Add. It counts in "Spent so far".</div>`}
-  </div>
-  ${(()=>{const food={};S.extra.filter(x=>x.cat==="Food").forEach(x=>{const v=num(x.v)||0;const sar=x.c==="SAR"?v:v*ar;food[x.d||""]=(food[x.d||""]||0)+sar;});
-    const days=Object.keys(food).sort().reverse();if(!days.length)return "";
-    const tot=days.reduce((a,d)=>a+food[d],0);
-    return `<h3>Food by day</h3><div class="box"><div class="hint" style="margin:0 0 8px">Budget 65 SAR a day. Average so far ${fmtNum(tot/days.length)} SAR.</div>${days.map(d=>{const v=food[d];return `<div class="fday"><span>${fmtDay(d)}</span><div class="bar"><i style="width:${Math.min(100,v/65*100)}%;${v>65?"background:var(--warn)":""}"></i></div><b class="${v>65?"over":""}">${fmtNum(v)} SAR</b></div>`;}).join("")}</div>`;})()}
-  <h3>Money exchanged</h3><div class="box">
+    <div class="field"><input id="newN" class="wide" placeholder="Note, e.g. taxi to Quba" data-f="newN" value="${esc(S.newN)}"><button class="pill solid" data-addx="1">Add</button></div>
+    ${S.extra.length?`<div class="xl">${S.extra.map((x,i)=>({x,i})).sort((a,b)=>(b.x.d||"").localeCompare(a.x.d||"")).map(({x,i})=>`<div class="ex"><span><b>${esc(x.cat)}</b> · ${fmtNum(num(x.v),2)} ${x.c}${x.c==="SAR"?` <small>(${fmtEUR(toE(num(x.v),"SAR"))})</small>`:""}<small class="dl">${fmtDay(x.d)}${x.n?" · "+esc(x.n):""}</small></span><button class="x" data-xdel="${i}" aria-label="Delete ${esc(x.cat)} expense">×</button></div>`).join("")}</div>`:`<div class="hint">For anything not in the plan. Pick a category, type the amount, tap Add.</div>`}`);
+  html+=`<h3>Money</h3>`+blk("ex","Money exchanged",S.ex.length?`€${fmtNum(exE)} at ${fmtNum(ar,3)}`:"none yet",`
     <div class="res"><div class="k">Your average rate</div><div class="v">${S.ex.length?fmtNum(ar,4)+" SAR per €":"none yet, plan uses "+RATE}</div>
     <div class="k">Exchanged</div><div class="v">€${fmtNum(exE)} = ${fmtNum(exS)} SAR</div></div>
     ${S.ex.map((x,i)=>`<div class="ex"><span>${esc(x.where)} · €${fmtNum(x.eur)} → <b>${fmtNum(exSar(x))} SAR</b><small class="dl">Final rate ${fmtNum(x.rate,3)}${x.shop?` · shop rate ${fmtNum(x.shop,2)}`:""}${x.fee?` · fee ${fmtNum(x.fee,2)} ${x.feeC}`:""}${x.over?" · typed directly":""}</small></span><button class="x" data-exdel="${i}" aria-label="Delete exchange">×</button></div>`).join("")}
@@ -621,16 +652,8 @@ function renderMoney(){
       <label>Final rate (optional)<input inputmode="decimal" placeholder="overrides" data-f="exFinal" value="${esc(S.exFinal)}"></label>
     </div>
     ${(()=>{const c=exCalc();return c?`<div class="sum"><span>${c.over?"Using the final rate you typed":`€${fmtNum(c.eur,2)} paid, fee included`}</span><b>${fmtNum(c.sar,2)} SAR</b><b class="e">${fmtNum(c.final,4)}</b></div>`:`<div class="hint">Type the rate shown and any fee, or type the final rate directly.</div>`;})()}
-    <button class="big" data-exadd="1" style="margin-top:12px;padding:13px;font-size:16px">Add exchange</button>
-  </div>
-  <h3>Planned items</h3><div class="hint" style="margin:-4px 0 6px">Type what you paid and pick SAR or EUR.</div><div class="list">`;
-  BUDGET.forEach((b,i)=>{
-    const pl=eur(b),a=getAct(b),v=toE(num(a.v),a.c),diff=v===null?null:v-pl;
-    html+=`<div class="money"><div class="what">${esc(b[0])}<span class="badge">${esc(b[1])}</span></div><div class="amt">${b[3]==="SAR"?fmtNum(b[2])+" SAR":fmtEUR(pl)}</div>
-      <div class="sub"><input id="act${i}" aria-label="Paid for ${esc(b[0])}" inputmode="decimal" data-a="${esc(b[0])}" value="${esc(a.v)}" placeholder="paid">${curSeg("data-cur",b[0],a.c)}
-      ${diff!==null&&Math.abs(diff)>=0.5?`<span class="${diff>0?"over":"under"}">${diff>0?"+":"-"}${fmtEUR(Math.abs(diff))}</span>`:""}</div></div>`;
-  });
-  $("#moneyBody").innerHTML=html+"</div>";
+    <button class="big" data-exadd="1" style="margin-top:12px;padding:13px;font-size:16px">Add exchange</button>`);
+  $("#moneyBody").innerHTML=html;
 }
 /* ---------- Money tools ---------- */
 function rateTo(c){return c==="EUR"?1:S.rates[c];}            /* units of c per 1 EUR */
@@ -771,7 +794,7 @@ document.addEventListener("click",e=>{
 document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;const d=e.target.dataset||{};
   if(d.lnew){e.preventDefault();const b=document.querySelector(`[data-ladd="${d.lnew}"]`);b&&b.click();}
   else if(e.target.id==="pW"||e.target.id==="pN"){e.preventDefault();const b=document.querySelector("[data-padd]");b&&b.click();}});
-document.addEventListener("toggle",e=>{const g=e.target.dataset&&e.target.dataset.g;if(g){S.open[g]=e.target.open;save();}},true);
+document.addEventListener("toggle",e=>{const g=e.target.dataset&&e.target.dataset.g;if(g){OPEN[g]=e.target.open;if(g==="food"&&!e.target.open&&current==="money")renderMoney();}},true);
 document.addEventListener("change",e=>{
   const d=e.target.dataset||{};const v=e.target.value.trim();
   if(d.a!==undefined){const b=BUDGET.find(x=>x[0]===d.a);S.act[d.a]=Object.assign({},getAct(b),{v:v.replace(",",".")});save();renderMoney();return;}
@@ -784,6 +807,10 @@ document.addEventListener("change",e=>{
 });
 /* live update of the quick converter while typing */
 document.addEventListener("input",e=>{
+  const fd=e.target.dataset&&e.target.dataset.food;
+  if(fd){const [d,k]=fd.split(":");(S.food[d]=S.food[d]||{})[k]=e.target.value.replace(",",".");save();
+    const t=foodDay(d),c=document.querySelector(`[data-ftot="${d}"]`);if(c){c.textContent=t?fmtNum(t):"–";c.className=t>65?"over":"";}
+    const m=$("#m-food");if(m)m.textContent=foodMeta();return;}
   if(e.target.dataset&&e.target.dataset.f==="convAmt"){S.conv.amt=e.target.value;save();
     const a=num(e.target.value)||0;
     ["SAR","BDT","EUR"].forEach(c=>{const o=document.querySelector(`[data-out="${c}"]`);if(o)o.textContent=fmtNum(conv(a,S.conv.cur,c),c==="BDT"?0:2);});}
