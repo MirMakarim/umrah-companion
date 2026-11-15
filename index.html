@@ -258,6 +258,7 @@ table.t tr.win td{color:var(--ok);font-weight:700}
 .upl2{display:block;text-align:center;margin-top:10px;font-size:15px;cursor:pointer}
 .docrow{display:flex;align-items:center;border-bottom:1px solid var(--line)}.docrow:last-child{border-bottom:0}
 .dopen{flex:1;display:flex;gap:10px;align-items:center;text-align:left;border:0;background:none;padding:10px 0;cursor:pointer;color:var(--brand);font-weight:600}
+.docrow .pill{margin-right:4px}
 .dopen small{display:block;color:var(--muted);font-weight:400;font-size:12px}
 .dic{flex:0 0 36px;height:36px;border-radius:8px;display:grid;place-items:center;font-size:10px;font-weight:800;background:var(--cs,#eee);color:var(--c,#333)}
 #viewer{position:fixed;inset:0;z-index:50;background:#111;display:flex;flex-direction:column}
@@ -804,7 +805,7 @@ function renderDocs(){
     <div class="hint" style="margin:0 0 8px">Save tickets, bookings, visa and permits here once. They stay only on this phone and open without internet.</div>
     <div class="pills">${DOC_CATS.map(c=>`<button class="pill sm${docCat===c?" on":""}" data-dcat="${c}">${c}</button>`).join("")}</div>
     <label class="big upl2">Add ${docCat.toLowerCase()} file<input type="file" accept="application/pdf,image/*" multiple data-dadd="1" hidden></label></div>`+
-  (by.length?by.map(([c,ds])=>blk("doc"+c,c,ds.length+(ds.length===1?" file":" files"),`<div class="links">${ds.map(d=>`<div class="docrow"><button class="dopen" data-dopen="${d.id}"><span class="dic">${/pdf/.test(d.type)?"PDF":"IMG"}</span><span>${esc(d.name)}<small>${kb(d.size)}</small></span></button><button class="x" data-ddel="${d.id}" aria-label="Delete ${esc(d.name)}">×</button></div>`).join("")}</div>`,{Flight:"flights",Hotel:"hotels",Train:"transport",Visa:"money",Permit:"food",Other:"other"}[c])).join(""):`<div class="hint">No files yet. Pick a type above, then tap Add.</div>`);
+  (by.length?by.map(([c,ds])=>blk("doc"+c,c,ds.length+(ds.length===1?" file":" files"),`<div class="links">${ds.map(d=>`<div class="docrow"><button class="dopen" data-dopen="${d.id}"><span class="dic">${/pdf/.test(d.type)?"PDF":"IMG"}</span><span>${esc(d.name)}<small>${kb(d.size)}</small></span></button><button class="pill sm" data-dshare="${d.id}">Share</button><button class="x" data-ddel="${d.id}" aria-label="Delete ${esc(d.name)}">×</button></div>`).join("")}</div>`,{Flight:"flights",Hotel:"hotels",Train:"transport",Visa:"money",Permit:"food",Other:"other"}[c])).join(""):`<div class="hint">No files yet. Pick a type above, then tap Add.</div>`);
 }
 let vURL=null,vDoc=null,vZoom=1,pdfLib=null;
 async function getPdf(){if(!pdfLib){pdfLib=await import("./lib/pdf.min.mjs");pdfLib.GlobalWorkerOptions.workerSrc="./lib/pdf.worker.min.mjs";}return pdfLib;}
@@ -832,6 +833,18 @@ async function openDoc(id){
 function closeDoc(fromPop){if($("#viewer").hidden)return;$("#viewer").hidden=true;$("#vbody").innerHTML="";if(!fromPop&&history.state&&history.state.viewer)history.back();}
 addEventListener("popstate",()=>closeDoc(true));
 addEventListener("keydown",e=>{if(e.key==="Escape")closeDoc();});
+/* open in the phone's own viewer (Quick Look on iPhone) */
+function docFile(d){const ext=/pdf/.test(d.type)?".pdf":(d.type.split("/")[1]||"jpg").replace("jpeg","jpg");return new File([d.blob],d.name+"."+ext.replace(/^\./,""),{type:d.type||"application/octet-stream"});}
+function openNative(id){
+  const d=DOCS.find(x=>x.id===id);if(!d)return;
+  const f=docFile(d),u=URL.createObjectURL(f);
+  const a=document.createElement("a");a.href=u;a.download=f.name;a.rel="noopener";document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u),60000);
+}
+async function shareNative(id){
+  const d=DOCS.find(x=>x.id===id);if(!d)return;const f=docFile(d);
+  if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f]});}catch(e){}}else openNative(id);
+}
 async function shareDoc(){if(!vDoc)return;const f=new File([vDoc.blob],vDoc.name+(/pdf/.test(vDoc.type)?".pdf":".jpg"),{type:vDoc.type});
   if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:vDoc.name});}catch(e){}}else{const a=document.createElement("a");a.href=vURL;a.download=f.name;a.click();}}
 function renderInfo(){
@@ -892,7 +905,8 @@ document.addEventListener("click",e=>{
   if(d.shadd){S.shops.push({name:"Saudi shop "+(S.shops.filter(x=>x.cur==="SAR").length+1),cur:"SAR",price:"",mk:"",mkT:"g",vat:"15",vatOn:"making"});save();renderTools();return;}
   if(d.refresh){refreshRates(true);return;}
   if(d.dcat){docCat=d.dcat;renderDocs();return;}
-  if(d.dopen){openDoc(d.dopen);return;}
+  if(d.dopen){openNative(d.dopen);return;}
+  if(d.dshare){shareNative(d.dshare);return;}
   if(d.ddel){const doc=DOCS.find(x=>x.id===d.ddel);if(doc&&confirm("Delete "+doc.name+" from this phone?")){docTx("readwrite",st=>st.delete(d.ddel)).then(loadDocs);}return;}
   if(t.id==="vclose"){closeDoc();return;}
   if(t.id==="vshare"){shareDoc();return;}
